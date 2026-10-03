@@ -38,8 +38,12 @@ const tilstandSkema = z.object({
       glitch: z.boolean(),
       // Standard, saa en tilstand gemt foer kontakten fandtes stadig kan laeses.
       maalingsfejl: z.boolean().default(false),
+      lydFra: z.boolean().default(false),
     })
-    .default({ sloeretKort: false, skjulKoordinat: false, glitch: false, maalingsfejl: false }),
+    .default({ sloeretKort: false, skjulKoordinat: false, glitch: false,
+      maalingsfejl: false,
+      lydFra: false,
+    }),
 });
 
 export const laesTilstand = async (sti: string): Promise<Tilstand | null> =>

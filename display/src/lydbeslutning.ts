@@ -27,6 +27,16 @@ export interface Lydresultat {
   readonly handlinger: readonly Lydhandling[];
 }
 
+/**
+ * Naar lyden er sat ud af drift, maa intet starte - men en sirene der allerede
+ * lyder, skal kunne tystes.
+ */
+export const afspilbare = (
+  handlinger: readonly Lydhandling[],
+  lydFra: boolean,
+): readonly Lydhandling[] =>
+  lydFra ? handlinger.filter((h) => h === 'STOP_SIRENE') : handlinger;
+
 export const tomLydtilstand = (): Lydtilstand => ({
   sirenerFor: null,
   kendteAnomalier: [],

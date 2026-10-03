@@ -102,7 +102,7 @@ export const bygTilstand = (overskriv: Partial<Tilstand> = {}): Tilstand => ({
   dekrypteringProcent: 0,
   dekrypteringFragment: null,
   vagthold: 'A',
-  ravage: { sloeretKort: false, skjulKoordinat: false, glitch: false, maalingsfejl: false },
+  ravage: { sloeretKort: false, skjulKoordinat: false, glitch: false, maalingsfejl: false, lydFra: false },
   ...overskriv,
 });
 

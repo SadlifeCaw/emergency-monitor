@@ -42,6 +42,7 @@ const ravageSkema = z.object({
   skjulKoordinat: z.boolean().optional(),
   glitch: z.boolean().optional(),
   maalingsfejl: z.boolean().optional(),
+  lydFra: z.boolean().optional(),
 });
 
 /**

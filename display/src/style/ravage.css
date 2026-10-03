@@ -244,3 +244,11 @@ body[data-glitcher='ja']::after {
     opacity: 0.5;
   }
 }
+
+.lydfra {
+  display: none;
+}
+
+body[data-lydfra='ja'] .lydfra {
+  display: block;
+}

@@ -18,6 +18,7 @@ describe('tomRavage', () => {
       skjulKoordinat: false,
       glitch: false,
       maalingsfejl: false,
+      lydFra: false,
     });
   });
 });
@@ -78,8 +79,18 @@ describe('maalingsfejl', () => {
       skjulKoordinat: false,
       glitch: false,
       maalingsfejl: true,
+      lydFra: false,
     });
     expect(r.udgaaende).toHaveLength(1);
   });
 
+});
+
+describe('lydFra', () => {
+  test('kan slaas til og fra uden at roere de andre', () => {
+    const rolig = bygTilstand();
+    const paa = saetRavage(rolig, { lydFra: true }, T0).tilstand;
+    expect(paa.ravage).toMatchObject({ lydFra: true, glitch: false, maalingsfejl: false });
+    expect(saetRavage(paa, { lydFra: false }, T0).tilstand.ravage.lydFra).toBe(false);
+  });
 });

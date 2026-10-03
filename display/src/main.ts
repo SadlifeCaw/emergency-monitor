@@ -21,7 +21,7 @@ import { lavMaalingsglitch, maalingsglitchAktiv } from './maalingsglitch.js';
 import { lavKort } from './kort/kort.js';
 import type { Kort } from './kort/kort.js';
 import { lavLyd } from './lyd.js';
-import { lydbeslutning, tomLydtilstand } from './lydbeslutning.js';
+import { afspilbare, lydbeslutning, tomLydtilstand } from './lydbeslutning.js';
 import type { Lydtilstand } from './lydbeslutning.js';
 import { lavAlarmpanel } from './paneler/alarm.js';
 import { lavDekrypteringspanel } from './paneler/dekryptering.js';
@@ -71,6 +71,7 @@ let kort: Kort | null = null;
 let harBasiskort = true;
 let ventetid = GENFORBIND_START_MS;
 let lydtilstand: Lydtilstand = tomLydtilstand();
+let lydVarFra = false;
 
 /**
  * Armering af lyden.
@@ -116,8 +117,23 @@ const tjekKortfil = async (): Promise<void> => {
   }
 };
 
+/**
+ * Kontakten "lyd fra". Slaas den til, tystes en sirene der allerede lyder, med
+ * det samme. Slaas den fra igen, mens en alarm staar ukvitteret, skal sirenen
+ * kunne starte forfra - saa den glemmer vi har spillet den.
+ */
+const synkLydFra = (lydFra: boolean): void => {
+  document.body.dataset['lydfra'] = lydFra ? 'ja' : 'nej';
+  if (lydFra && !lydVarFra) lyd.tavs();
+  if (!lydFra && lydVarFra) lydtilstand = { ...lydtilstand, sirenerFor: null };
+  lydVarFra = lydFra;
+};
+
 /** Oversaetter skaermbilledet til lyd. Beslutningen ligger i lydbeslutning.ts. */
 const opdaterLyd = (s: Skaermbillede): void => {
+  const lydFra = s.ravage.lydFra;
+  synkLydFra(lydFra);
+
   const resultat = lydbeslutning(lydtilstand, {
     alarmId: s.alarm?.haendelseId ?? null,
     kvitteret: s.alarm?.kvitteret ?? false,
@@ -125,7 +141,7 @@ const opdaterLyd = (s: Skaermbillede): void => {
   });
   lydtilstand = resultat.tilstand;
 
-  for (const handling of resultat.handlinger) {
+  for (const handling of afspilbare(resultat.handlinger, lydFra)) {
     if (handling === 'START_SIRENE') lyd.sirene();
     if (handling === 'STOP_SIRENE') lyd.tavs();
     if (handling === 'BLIP') lyd.blip();

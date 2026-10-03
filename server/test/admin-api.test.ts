@@ -402,6 +402,7 @@ describe('ravage', () => {
       skjulKoordinat: false,
       glitch: true,
       maalingsfejl: false,
+      lydFra: false,
     });
   });
 
@@ -422,6 +423,7 @@ describe('ravage', () => {
       skjulKoordinat: false,
       glitch: false,
       maalingsfejl: false,
+      lydFra: false,
     });
   });
 });

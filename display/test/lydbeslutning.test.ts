@@ -1,5 +1,5 @@
 import { describe, expect, test } from 'vitest';
-import { lydbeslutning, tomLydtilstand } from '../src/lydbeslutning.js';
+import { afspilbare, lydbeslutning, tomLydtilstand } from '../src/lydbeslutning.js';
 import type { Lydtilstand } from '../src/lydbeslutning.js';
 
 const skaerm = (o: Partial<Parameters<typeof lydbeslutning>[1]> = {}) => ({
@@ -91,5 +91,19 @@ describe('anomalier', () => {
     const foerste = efter(tomLydtilstand(), { alarmId: 'alarm-hoved' });
     const anden = efter(foerste.tilstand, { alarmId: 'alarm-hoved', anomaliIder: ['a9'] });
     expect(anden.handlinger).not.toContain('BLIP');
+  });
+});
+
+describe('afspilbare - lyd fra', () => {
+  test('lader alt passere, naar lyden er til', () => {
+    expect(afspilbare(['START_SIRENE', 'BLIP'], false)).toEqual(['START_SIRENE', 'BLIP']);
+  });
+
+  test('stopper sirene og blip, naar lyden er fra', () => {
+    expect(afspilbare(['START_SIRENE', 'BLIP'], true)).toEqual([]);
+  });
+
+  test('lader en sirene blive tystet, selv om lyden er fra', () => {
+    expect(afspilbare(['STOP_SIRENE'], true)).toEqual(['STOP_SIRENE']);
   });
 });

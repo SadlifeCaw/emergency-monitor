@@ -15,6 +15,8 @@
  *  - **Glitch.** Skaermen sætter ud en gang imellem og kommer tilbage igen.
  *  - **Maalingsforstyrrelse.** Seismik, EMF, temperatur og dekryptering glitcher
  *    sporadisk hver for sig. Skaermen holder den selv ude under en alarm.
+ *  - **Lyd fra.** Skaermen kan ikke naa hoejttalerne: alt lyd tier, og et
+ *    lyd-fra-ikon staar i hjoernet. En alarm kan kun ses, ikke hoeres.
  *
  * De er med vilje uafhaengige. Man skal kunne skrue op for ubehaget lidt ad
  * gangen og skrue ned igen, hvis det bliver for meget.
@@ -27,6 +29,7 @@ export interface Ravage {
   readonly skjulKoordinat: boolean;
   readonly glitch: boolean;
   readonly maalingsfejl: boolean;
+  readonly lydFra: boolean;
 }
 
 export const tomRavage = (): Ravage => ({
@@ -34,6 +37,7 @@ export const tomRavage = (): Ravage => ({
   skjulKoordinat: false,
   glitch: false,
   maalingsfejl: false,
+  lydFra: false,
 });
 
 /**
@@ -55,6 +59,7 @@ export const saetRavage = (
     skjulKoordinat: aendringer.skjulKoordinat ?? tilstand.ravage.skjulKoordinat,
     glitch: aendringer.glitch ?? tilstand.ravage.glitch,
     maalingsfejl: aendringer.maalingsfejl ?? tilstand.ravage.maalingsfejl,
+    lydFra: aendringer.lydFra ?? tilstand.ravage.lydFra,
   };
 
   const uaendret = (Object.keys(ravage) as (keyof Ravage)[]).every(
