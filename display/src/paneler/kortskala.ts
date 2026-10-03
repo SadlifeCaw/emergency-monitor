@@ -11,7 +11,7 @@
 
 import { el, saetTekst } from './panel.js';
 
-const RUNDE_LAENGDER = [25, 50, 100, 200, 500, 1000] as const;
+const RUNDE_LAENGDER = [25, 50, 100, 200, 500, 1000, 2000] as const;
 /** Skalastregen sigter efter denne bredde i pixels. */
 const MAALBREDDE_PX = 110;
 
@@ -30,7 +30,7 @@ export const lavKortskala = (vaert: HTMLElement): Kortskala => {
 
       const oensket = MAALBREDDE_PX * meterPrPixel;
       // Findes intet rundt tal stort nok, bruges det stoerste vi har.
-      const laengde = RUNDE_LAENGDER.find((l) => l >= oensket) ?? 1000;
+      const laengde = RUNDE_LAENGDER.find((l) => l >= oensket) ?? 2000;
 
       streg.style.width = `${Math.round(laengde / meterPrPixel)}px`;
       saetTekst(maerkat, `${laengde} m`);

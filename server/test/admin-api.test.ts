@@ -209,7 +209,7 @@ describe('scenarieaendringer', () => {
 
     expect(svar.statusCode).toBe(400);
     expect(svar.json().fejl).toMatch(/m fra basen/);
-    expect(svar.json().fejl).toMatch(/800 m/);
+    expect(svar.json().fejl).toMatch(/2000 m/);
   });
 
   test('flytter alarmen til et gyldigt punkt og viser den nye afstand', async () => {

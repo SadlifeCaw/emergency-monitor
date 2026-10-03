@@ -23,6 +23,7 @@
     "generalprove": "npm run build --workspaces --if-present && tsx scripts/generalprove.mjs",
     "hent-kort": "node scripts/hent-kort.mjs",
     "adminlink": "node scripts/adminlink.mjs",
+    "natvagt": "powershell -NoProfile -ExecutionPolicy Bypass -File scripts/start-natvagt.ps1",
     "i-aften": "npm run build --workspaces --if-present && tsx scripts/i-aften.mjs"
   },
   "devDependencies": {

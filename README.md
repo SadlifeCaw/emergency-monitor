@@ -136,3 +136,22 @@ Optagelsesprøven om søndagen (`../Optagelsesprøven/`) slutter med en lukket k
 *»EGTVED – ARKIVMATERIALE. Til nyoptaget personel. Afventer nattens briefing.«*
 Drejebogen gemmer eksplicit **kultens navn, overtroen og kortets første halvdel**
 til nattens papirarbejde. Monitoren er den kanal, der leverer den anden halvdel.
+
+## Start natvagten (kør non-stop)
+
+Dobbeltklik på **`start.bat`** (eller `npm run natvagt`). Scriptet:
+
+- holder PC'en vågen (ingen dvale/slukket skærm på lysnettet),
+- bygger skærm og admin, hvis det mangler,
+- åbner skærmen i fuldskærm (Chrome/Edge kiosk),
+- **genstarter serveren automatisk, hvis den dør** — nattens tilstand ligger på disk og genoptages.
+
+```
+start.bat -Autostart        # start selv ved hver Windows-login
+start.bat -FjernAutostart   # fortryd
+start.bat -UdenBrowser      # kun serveren
+```
+
+Kortet dækker nu en radius på **2000 m** (`kort.maxRadiusM` i `scenarios/nat.json`,
+start-zoom 14). Kortfilen rækker 3000 m fra basen; ønskes mere, hæv radius og kør
+`npm run hent-kort -- --margin 6000`.
