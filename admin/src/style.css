@@ -561,3 +561,23 @@ body {
     transition: none;
   }
 }
+
+/* ---------------------------------------------------------------- adresseopslag */
+
+.adresseraekke {
+  display: grid;
+  grid-template-columns: 1fr 5rem;
+  gap: 0.6rem;
+  align-items: end;
+}
+
+.traef {
+  display: grid;
+  gap: 0.4rem;
+}
+
+.tast--traef {
+  text-align: left;
+  letter-spacing: 0.02em;
+  line-height: 1.3;
+}

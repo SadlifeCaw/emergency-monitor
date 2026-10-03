@@ -19,6 +19,8 @@
 // TypeScript uden afhaengigheder, saa det bundles ind uden videre - og en
 // afstand udregnet paa telefonen skal give det samme som paa skaermen.
 import { afstandM, formaterDdm, pejlingGrader, sektorFor } from '../../server/src/motor/geo.js';
+import { AdresseFejl, soegAdresse } from './adresse.js';
+import type { Adressetraef } from './adresse.js';
 import type { Adminoversigt, HaendelseIOversigt } from './typer.js';
 
 /** Vaerdier en ny alarm faar, som ikke er vaerd at taste paa en telefon. */
@@ -88,6 +90,9 @@ const medMaerkat = (maerkat: string, input: HTMLElement): HTMLElement => {
 
 interface Felter {
   readonly overskrift: HTMLElement;
+  readonly adresse: HTMLInputElement;
+  readonly findknap: HTMLButtonElement;
+  readonly traef: HTMLElement;
   readonly tid: HTMLInputElement;
   readonly lat: HTMLInputElement;
   readonly lon: HTMLInputElement;
@@ -106,6 +111,14 @@ const byg = (vaert: HTMLElement): Felter => {
   const punkt = felt('alarmpunkt', 'text');
   const instruks = felt('alarminstruks', 'text');
 
+  const adresse = felt('alarmadresse', 'text');
+  adresse.placeholder = 'fx Vork Bakker 12, Vejle';
+  const findknap = el('button', 'tast tast--lille', 'Find');
+  findknap.type = 'button';
+  const adresseraekke = el('div', 'adresseraekke');
+  adresseraekke.append(medMaerkat('Adresse eller sted (valgfri)', adresse), findknap);
+  const traef = el('div', 'traef');
+
   const koordinater = el('div', 'par');
   koordinater.append(medMaerkat('Bredde (lat)', lat), medMaerkat('Længde (lon)', lon));
 
@@ -116,6 +129,8 @@ const byg = (vaert: HTMLElement): Felter => {
   vaert.append(
     overskrift,
     medMaerkat('Tidspunkt', tid),
+    adresseraekke,
+    traef,
     koordinater,
     kvittering,
     medMaerkat('Nærmeste kendte punkt', punkt),
@@ -123,7 +138,7 @@ const byg = (vaert: HTMLElement): Felter => {
     gemknap,
   );
 
-  return { overskrift, tid, lat, lon, punkt, instruks, kvittering, gemknap };
+  return { overskrift, adresse, findknap, traef, tid, lat, lon, punkt, instruks, kvittering, gemknap };
 };
 
 interface Graenser {
@@ -192,6 +207,41 @@ export const lavAlarmpanel = (
       if (input !== punkt && input !== instruks) efterproev(f, graenser, serverNu);
     });
   }
+
+  const vaelgTraef = (t: Adressetraef): void => {
+    lat.value = t.lat.toFixed(6);
+    lon.value = t.lon.toFixed(6);
+    f.traef.replaceChildren();
+    redigerer = true;
+    efterproev(f, graenser, serverNu);
+  };
+
+  const find = async (): Promise<void> => {
+    f.traef.replaceChildren();
+    f.findknap.disabled = true;
+    try {
+      const fundet = await soegAdresse(f.adresse.value, graenser.base, (url) => fetch(url));
+      if (fundet.length === 0) {
+        f.traef.append(el('p', 'aflaesning', 'Ingen resultater. Prøv en anden stavemåde.'));
+      }
+      for (const t of fundet) {
+        const knap = el('button', 'tast tast--lille tast--traef', t.navn);
+        knap.type = 'button';
+        knap.addEventListener('click', () => vaelgTraef(t));
+        f.traef.append(knap);
+      }
+    } catch (fejl) {
+      const tekst = fejl instanceof AdresseFejl ? fejl.message : 'Opslaget fejlede.';
+      f.traef.append(el('p', 'aflaesning', tekst));
+    } finally {
+      f.findknap.disabled = false;
+    }
+  };
+
+  f.findknap.addEventListener('click', () => void find());
+  f.adresse.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter') void find();
+  });
 
   gemknap.addEventListener('click', () => {
     if (!efterproev(f, graenser, serverNu)) return;
