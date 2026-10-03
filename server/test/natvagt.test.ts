@@ -184,16 +184,16 @@ describe('hele natten fra ende til anden', () => {
     const faser = new Set<string>();
     let saaAlarm = false;
 
-    // Ét skridt i minuttet fra vagtstart til efter alarmen.
-    for (let m = 0; m <= 200; m += 1) {
+    // Ét skridt i minuttet fra vagtstart og til alarmen er faldet, men ikke slukket.
+    for (let m = 0; m <= 167; m += 1) {
       ur.saet(VAGT_START + min(m));
       await natvagt.skridt();
       faser.add(natvagt.tilstand().fase);
       if (natvagt.skaermbillede().alarm) saaAlarm = true;
     }
 
-    // Der er ingen AFSLUTTET laengere: monitoren koerer hele ugen og slutter
-    // ikke af sig selv. Alarmen bliver staaende, til nogen stopper den.
+    // Der er ingen AFSLUTTET laengere: monitoren slutter ikke af sig selv.
+    // Alarmen staar i 5 minutter, eller til nogen stopper den.
     expect([...faser].sort()).toEqual(['ALARM', 'OPTRAPNING', 'ROLIG']);
     expect(saaAlarm).toBe(true);
     expect(natvagt.tilstand().fase).toBe('ALARM');

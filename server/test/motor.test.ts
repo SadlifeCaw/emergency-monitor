@@ -97,10 +97,10 @@ describe('tick - anomalier opløses selv', () => {
     expect(slags(igen.udgaaende, 'ANOMALI_OPLOEST')).toHaveLength(0);
   });
 
-  test('en alarm opløses aldrig af sig selv', () => {
+  test('en alarm opløses ikke af anomali-fristen, men først efter 5 minutter', () => {
     const s = medHaendelser(bygAlarm({ at: iso(T0 + min(10)) }));
     let t = tick(s, nyTilstand(s, T0), T0 + min(10)).tilstand;
-    t = tick(s, t, T0 + min(90)).tilstand;
+    t = tick(s, t, T0 + min(14)).tilstand;
     expect(t.fase).toBe('ALARM');
     expect(t.aktivAlarm?.haendelseId).toBe('alarm-hoved');
   });
@@ -158,12 +158,34 @@ describe('faser', () => {
   });
 });
 
+describe('alarmen slukker selv efter 5 minutter', () => {
+  const scenarie = medHaendelser(bygAlarm({ at: iso(T0 + min(10)) }));
+  const medAlarm = () => tick(scenarie, nyTilstand(scenarie, T0), T0 + min(10)).tilstand;
+
+  test('staar stadig lige foer de 5 minutter er gaaet', () => {
+    const t = tick(scenarie, medAlarm(), T0 + min(14.9)).tilstand;
+    expect(t.fase).toBe('ALARM');
+  });
+
+  test('stopper efter 5 minutter og gaar tilbage til ROLIG', () => {
+    const r = tick(scenarie, medAlarm(), T0 + min(15));
+    expect(r.tilstand.aktivAlarm).toBeNull();
+    expect(r.tilstand.fase).toBe('ROLIG');
+    expect(slags(r.udgaaende, 'ALARM_STOPPET')).toHaveLength(1);
+  });
+
+  test('en kvitteret alarm slukker ogsaa efter 5 minutter fra fyring', () => {
+    const kvitteret = kvitter(medAlarm(), T0 + min(12)).tilstand;
+    expect(tick(scenarie, kvitteret, T0 + min(15)).tilstand.aktivAlarm).toBeNull();
+  });
+});
+
 describe('alarmen bliver staaende', () => {
   const scenarie = medHaendelser(bygAlarm({ at: iso(T0 + min(10)) }));
   const medAlarm = () => tick(scenarie, nyTilstand(scenarie, T0), T0 + min(10)).tilstand;
 
-  test('forbliver aktiv time efter time uden indgriben', () => {
-    const t = tick(scenarie, medAlarm(), T0 + min(300)).tilstand;
+  test('forbliver aktiv, til den slukker selv efter 5 minutter', () => {
+    const t = tick(scenarie, medAlarm(), T0 + min(14)).tilstand;
     expect(t.fase).toBe('ALARM');
     expect(t.aktivAlarm?.kvitteretKl).toBeNull();
   });
@@ -183,7 +205,7 @@ describe('alarmen bliver staaende', () => {
 
   test('en kvitteret alarm bliver ikke ukvitteret ved naeste tick', () => {
     const kvitteret = kvitter(medAlarm(), T0 + min(12)).tilstand;
-    const t = tick(scenarie, kvitteret, T0 + min(20)).tilstand;
+    const t = tick(scenarie, kvitteret, T0 + min(13)).tilstand;
     expect(t.aktivAlarm?.kvitteretKl).toBe(iso(T0 + min(12)));
   });
 });

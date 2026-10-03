@@ -21,6 +21,9 @@ import type {
   UdgaaendeBegivenhed,
 } from './typer.js';
 
+/** Hvor laenge en alarm staar paa skaermen, foer den slukker selv. */
+export const ALARM_VARIGHED_MS = 5 * 60 * 1000;
+
 const iso = (nu: number): string => new Date(nu).toISOString();
 
 const erFyret = (tilstand: Tilstand, id: string): boolean => id in tilstand.fyrede;
@@ -117,6 +120,21 @@ const afskrivForfaldneAnomalier = (
   return { tilstand: fyrede === tilstand.fyrede ? tilstand : { ...tilstand, fyrede }, udgaaende };
 };
 
+/** Slukker en alarm, der har staaet i ALARM_VARIGHED_MS. Hændelsen forbliver fyret. */
+const afskrivForfaldenAlarm = (
+  tilstand: Tilstand,
+  nu: number,
+): { tilstand: Tilstand; udgaaende: UdgaaendeBegivenhed[] } => {
+  const alarm = tilstand.aktivAlarm;
+  if (!alarm || nu < Date.parse(alarm.fyretKl) + ALARM_VARIGHED_MS) {
+    return { tilstand, udgaaende: [] };
+  }
+  return {
+    tilstand: { ...tilstand, aktivAlarm: null },
+    udgaaende: [{ slags: 'ALARM_STOPPET', haendelseId: alarm.haendelseId, kl: iso(nu) }],
+  };
+};
+
 /** Saetter fasen og udsender et FASE_SKIFT, hvis den faktisk aendrede sig. */
 const afslutTick = (
   scenarie: Scenarie,
@@ -155,10 +173,12 @@ export const tick = (scenarie: Scenarie, tilstand: Tilstand, nu: number): Tickre
   }
 
   const afskrevet = afskrivForfaldneAnomalier(scenarie, arbejde, nu);
+  const alarmSlut = afskrivForfaldenAlarm(afskrevet.tilstand, nu);
 
-  return afslutTick(scenarie, tilstand.fase, afskrevet.tilstand, [
+  return afslutTick(scenarie, tilstand.fase, alarmSlut.tilstand, [
     ...udgaaende,
     ...afskrevet.udgaaende,
+    ...alarmSlut.udgaaende,
   ], nu);
 };
 
