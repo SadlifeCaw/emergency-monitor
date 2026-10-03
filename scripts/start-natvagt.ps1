@@ -59,6 +59,19 @@ if ($optaget) {
   exit 1
 }
 
+# --- skriv admin-linket ud, kopier det og gem det i en fil -------------------
+# Skaermen aabner i fuldskaerm og daekker dette vindue - derfor ogsaa filen.
+$linkTekst = & node scripts/adminlink.mjs | Out-String
+Write-Host $linkTekst
+$links = [regex]::Matches($linkTekst, 'http://\S+/admin/\S*') | ForEach-Object { $_.Value }
+if ($links) {
+  Set-Clipboard -Value $links[0]
+  Set-Content -Path (Join-Path $rod 'admin-link.txt') -Value $links -Encoding utf8
+  Write-Host "ADMIN-LINK (kopieret til udklipsholderen, og gemt i admin-link.txt):" -ForegroundColor Cyan
+  $links | ForEach-Object { Write-Host "  $_" -ForegroundColor Cyan }
+  Write-Host ''
+}
+
 # --- aabn skaermen -----------------------------------------------------------
 function Aabn-Skaerm {
   $kandidater = @(

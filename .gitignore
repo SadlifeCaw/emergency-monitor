@@ -22,3 +22,6 @@ scenarios/i-aften.json
 
 # Lokale agent-skills og indstillinger
 .claude/
+
+# Indeholder admin-tokenet
+admin-link.txt

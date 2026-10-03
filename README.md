@@ -155,3 +155,7 @@ start.bat -UdenBrowser      # kun serveren
 Kortet dækker nu en radius på **3000 m** (`kort.maxRadiusM` i `scenarios/nat.json`,
 start-zoom 13). Kortfilen rækker 4500 m fra basen; ønskes mere, hæv radius og kør
 `npm run hent-kort -- --margin 7000`.
+
+`start.bat` skriver også **admin-linket** ud, kopierer det til udklipsholderen og gemmer det
+i `admin-link.txt` (skærmen i fuldskærm dækker vinduet). Linket indeholder tokenet og bliver ikke
+committet. Skifter netværk (fx på Vork), får du det rigtige link ved næste start.
