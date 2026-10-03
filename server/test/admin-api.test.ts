@@ -380,6 +380,8 @@ describe('ravage', () => {
     expect(alarm.ddm).toBeNull();
     expect(alarm.ddmLat).toBeNull();
     expect(alarm.ddmLon).toBeNull();
+    expect(alarm.gradLat).toBeNull();
+    expect(alarm.gradLon).toBeNull();
     // Afstand og pejling bliver staaende - det er kun koordinatet der slaas fra.
     expect(alarm.afstandM).toBe(394);
     expect(alarm.pejlingGrader).toBe(60);

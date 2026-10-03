@@ -6,7 +6,7 @@
  * gaar efter, og de skal komme fra det samme sted som testene rammer.
  */
 
-import { afstandM, ddmDele, formaterDdm, pejlingGrader, sektorFor } from '../motor/geo.js';
+import { afstandM, ddmDele, decimalgrader, formaterDdm, pejlingGrader, sektorFor } from '../motor/geo.js';
 import { anomaliNu, dekrypteringNu, stemningFra } from '../motor/stemning.js';
 import { aflaes } from '../motor/telemetri.js';
 import type { Loglinje, Sensoraflaesning } from '../motor/telemetri.js';
@@ -33,6 +33,9 @@ export interface AlarmVisning {
   /** Samme koordinat delt i to, saa skaermen kan saette dem paa hver sin linje. */
   readonly ddmLat: string | null;
   readonly ddmLon: string | null;
+  /** Decimalgrader som i admin ("55.66010"), til at slaa op i Google Maps. Null som ddm. */
+  readonly gradLat: string | null;
+  readonly gradLon: string | null;
   readonly afstandM: number;
   readonly pejlingGrader: number;
   readonly fyretKl: string;
@@ -110,6 +113,8 @@ export const bygAlarmvisning = (
     ddm: skjult ? null : formaterDdm(punkt),
     ddmLat: skjult ? null : ddmDele(punkt).lat,
     ddmLon: skjult ? null : ddmDele(punkt).lon,
+    gradLat: skjult ? null : decimalgrader(punkt).lat,
+    gradLon: skjult ? null : decimalgrader(punkt).lon,
     // Hele meter og hele grader: det er opløsningen et kompas og et par ben har.
     afstandM: Math.round(afstandM(scenarie.base, punkt)),
     pejlingGrader: Math.round(pejling) % 360,

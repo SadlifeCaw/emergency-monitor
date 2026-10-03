@@ -112,10 +112,10 @@ export const lavAlarmpanel = (vaert: HTMLElement): Panel => {
       // Mens det er tabt, skriver koordinattab.ts i felterne mange gange i
       // sekundet. Derfor roerer vi dem ikke her; ellers ville de to skrive oven
       // i hinanden, og aflaesningen ville staa stille hvert sekund.
-      const tabt = a.ddmLat === null || a.ddmLon === null;
+      const tabt = a.gradLat === null || a.gradLon === null;
       if (!tabt) {
-        saetTekst(f.lat, a.ddmLat ?? '—');
-        saetTekst(f.lon, a.ddmLon ?? '—');
+        saetTekst(f.lat, a.gradLat ?? '—');
+        saetTekst(f.lon, a.gradLon ?? '—');
       }
       f.lat.dataset['tabt'] = tabt ? 'ja' : 'nej';
       f.lon.dataset['tabt'] = tabt ? 'ja' : 'nej';

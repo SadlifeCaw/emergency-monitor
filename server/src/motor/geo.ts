@@ -83,6 +83,15 @@ export const ddmDele = (punkt: Punkt): { lat: string; lon: string } => ({
 });
 
 /**
+ * Decimalgrader med fem decimaler (ca. 1 m) - samme skrivemaade som felterne i admin,
+ * og den Google Maps forstaar, naar den indsaettes som "55.66010, 9.36480".
+ */
+export const decimalgrader = (punkt: Punkt): { lat: string; lon: string } => ({
+  lat: punkt.lat.toFixed(5),
+  lon: punkt.lon.toFixed(5),
+});
+
+/**
  * Grader og decimalminutter - formatet paa et soekort og i en redningsmelding.
  * Valgt frem for decimalgrader, fordi det er lettere at skrive korrekt af i moerke.
  */

@@ -47,6 +47,8 @@ describe('bygAlarmvisning', () => {
     expect(v?.ddmLat).toBe("55°39.606'N");
     expect(v?.ddmLon).toBe("009°21.888'E");
     expect(`${v?.ddmLat} ${v?.ddmLon}`).toBe(v?.ddm);
+    expect(v?.gradLat).toBe('55.66010');
+    expect(v?.gradLon).toBe('9.36480');
   });
 
   test('afstand og pejling er hele tal - de skal skrives af i moerke', () => {

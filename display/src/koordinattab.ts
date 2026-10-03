@@ -27,8 +27,8 @@ const CIFRE = '0123456789';
 const TABTE = '█▓▒';
 
 /** `#` er en plads, der kommer fra antennen. Alt andet tegner instrumentet selv. */
-export const SKABELON_LAT = "##°##.###'N";
-export const SKABELON_LON = "###°##.###'E";
+export const SKABELON_LAT = '##.#####';
+export const SKABELON_LON = '#.#####';
 
 /**
  * Mindste antal udfaldne pladser pr. linje.

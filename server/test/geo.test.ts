@@ -1,6 +1,7 @@
 import { describe, expect, test } from 'vitest';
 import {
   afstandM,
+  decimalgrader,
   formaterDdm,
   indenforRadius,
   pejlingGrader,
@@ -123,6 +124,12 @@ describe('sektorFor', () => {
   test('afviser et ugyldigt antal sektorer', () => {
     expect(() => sektorFor(0, 0)).toThrow(/sektorer/i);
     expect(() => sektorFor(0, 2.5)).toThrow(/sektorer/i);
+  });
+});
+
+describe('decimalgrader', () => {
+  test('skriver fem decimaler uden fortegn eller bogstaver, klar til Google Maps', () => {
+    expect(decimalgrader({ lat: 55.6601, lon: 9.3648 })).toEqual({ lat: '55.66010', lon: '9.36480' });
   });
 });
 
