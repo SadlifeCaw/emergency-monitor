@@ -108,7 +108,6 @@ const scenarieSkema = z.object({
     maxRadiusM: z.number().min(50).max(5000),
     sektorer: z.number().int().min(1).max(36),
   }),
-  vagt: z.object({ start: tidspunkt, slut: tidspunkt }),
   nat: z
     .object({
       fra: z.string().regex(/^\d{1,2}:\d{2}$/, 'skal vaere et klokkeslaet som "23:00"'),
@@ -134,24 +133,6 @@ const kraevUnikkeIder = (haendelser: readonly Haendelse[]): void => {
       throw new ScenarieFejl(`Ugyldigt scenarie: haendelses-id "${h.id}" bruges mere end en gang`);
     }
     set.add(h.id);
-  }
-};
-
-const kraevGyldigtVagtvindue = (scenarie: Scenarie): void => {
-  const start = Date.parse(scenarie.vagt.start);
-  const slut = Date.parse(scenarie.vagt.slut);
-  if (slut <= start) {
-    throw new ScenarieFejl(
-      `Ugyldigt scenarie: vagten slutter (${scenarie.vagt.slut}) foer den begynder (${scenarie.vagt.start})`,
-    );
-  }
-  for (const h of scenarie.haendelser) {
-    const at = Date.parse(h.at);
-    if (at < start || at > slut) {
-      throw new ScenarieFejl(
-        `Ugyldigt scenarie: haendelsen "${h.id}" ligger kl. ${h.at}, uden for perioden ${scenarie.vagt.start} - ${scenarie.vagt.slut}`,
-      );
-    }
   }
 };
 
@@ -201,7 +182,6 @@ export const laesScenarie = (raa: unknown): Scenarie => {
   };
 
   kraevUnikkeIder(scenarie.haendelser);
-  kraevGyldigtVagtvindue(scenarie);
   kraevGyldigeSektorer(scenarie);
   kraevAlarmerIndenforRadius(scenarie);
 

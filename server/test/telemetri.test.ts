@@ -92,10 +92,10 @@ describe('aflaes', () => {
     expect(optrapning).toBeGreaterThan(rolig + 0.2);
   });
 
-  test('temperaturen falder gennem natten', () => {
-    const tidligt = aflaes(scenarie, roligTilstand, T0 + min(10)).temperatur;
-    const sent = aflaes(scenarie, roligTilstand, T0 + min(300)).temperatur;
-    expect(sent).toBeLessThan(tidligt - 2);
+  test('temperaturen er koldest midt paa natten og varmest om eftermiddagen', () => {
+    const eftermiddag = aflaes(scenarie, roligTilstand, new Date(2026, 6, 15, 14).getTime());
+    const nat = aflaes(scenarie, roligTilstand, new Date(2026, 6, 16, 2).getTime());
+    expect(nat.temperatur).toBeLessThan(eftermiddag.temperatur - 2);
   });
 
   test('temperaturen holder sig i et troværdigt julinat-interval', () => {

@@ -49,7 +49,6 @@ export interface Adminoversigt {
   readonly scenarienavn: string;
   readonly base: Scenarie['base'];
   readonly kort: Scenarie['kort'];
-  readonly vagt: Scenarie['vagt'];
   readonly haendelser: readonly HaendelseIOversigt[];
   readonly aktivAlarm: Tilstand['aktivAlarm'];
   /** Hvilke forstyrrelser der er slaaet til lige nu. */
@@ -111,7 +110,6 @@ export const bygAdminoversigt = (
     scenarienavn: scenarie.navn,
     base: scenarie.base,
     kort: scenarie.kort,
-    vagt: scenarie.vagt,
     haendelser,
     aktivAlarm: tilstand.aktivAlarm,
     ravage: tilstand.ravage,

@@ -3,7 +3,7 @@
  *
  * Det baerende valg her: **enhver aendring bygger et helt nyt scenarie, som skal
  * bestaa praecis den samme validering som filen paa disken.** Admin kan derfor
- * ikke bryde en eneste invariant - alarmradius, sektorer, vagtvindue, unikke
+ * ikke bryde en eneste invariant - alarmradius, sektorer, unikke
  * id'er - uden at reglerne skal skrives to steder.
  *
  * Konsekvensen er, at fejlbeskederne fra `laesScenarie` gaar direkte videre til

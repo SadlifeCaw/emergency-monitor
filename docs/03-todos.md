@@ -197,7 +197,7 @@ Den vigtigste enkeltopgave i projektet.
 
 **Det bærende valg:** enhver ændring fra telefonen bygger et helt nyt scenarie,
 som skal bestå **præcis den samme validering som filen på disken**. Admin kan
-derfor ikke bryde en eneste invariant — alarmradius, sektorer, vagtvindue,
+derfor ikke bryde en eneste invariant — alarmradius, sektorer,
 unikke id'er — uden at reglerne skal skrives to steder. Validatorens danske
 fejlbeskeder går ordret videre til telefonen; de er skrevet til et menneske.
 

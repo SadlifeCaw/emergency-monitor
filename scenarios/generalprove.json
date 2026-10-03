@@ -14,11 +14,6 @@
     "maxRadiusM": 3000,
     "sektorer": 8
   },
-  "_vagt": "Perioden monitoren koerer i - hele kurset, ikke én nat. Alarmer skal ligge inden for den.",
-  "vagt": {
-    "start": "2026-07-11T12:00:00+02:00",
-    "slut": "2026-07-18T12:00:00+02:00"
-  },
   "_nat": "Hvornaar der maa ske noget af sig selv. Uden for vinduet koerer skaermen roligt videre, men der sker ingenting.",
   "nat": {
     "fra": "23:00",

@@ -67,16 +67,6 @@ describe('laesScenarie', () => {
     expect(() => laesScenarie(raa({ haendelser: [daarlig] }))).toThrow(ScenarieFejl);
   });
 
-  test('afviser at vagtvinduet slutter foer det begynder', () => {
-    const vagt = { start: iso(T0 + min(60)), slut: iso(T0) };
-    expect(() => laesScenarie(raa({ vagt }))).toThrow(/vagt/i);
-  });
-
-  test('afviser en haendelse uden for perioden', () => {
-    const efterVagt = bygAnomali({ at: iso(T0 + min(400)) });
-    expect(() => laesScenarie(raa({ haendelser: [efterVagt] }))).toThrow(/perioden/i);
-  });
-
   test('giver en laesbar fejl - ikke et raat zod-dump', () => {
     let besked = '';
     try {

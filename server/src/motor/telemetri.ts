@@ -95,9 +95,10 @@ export const aflaes = (scenarie: Scenarie, tilstand: Tilstand, nu: number): Sens
 
 /** Doegnrytme: koeligere mod morgenstunden, med et ekstra dyk naar noget sker. */
 const temperatur = (scenarie: Scenarie, nu: number, p: number, t: number): number => {
-  const start = Date.parse(scenarie.vagt.start);
-  const slut = Date.parse(scenarie.vagt.slut);
-  const andel = klip((nu - start) / Math.max(1, slut - start), 0, 1);
+  // Doegnrytme efter lokal tid: varmest kl. 14, koldest kl. 02.
+  const d = new Date(nu);
+  const time = d.getHours() + d.getMinutes() / 60;
+  const andel = 0.5 - 0.5 * Math.cos((2 * Math.PI * (time - 14)) / 24);
   const stoej = (enhedsStoej(scenarie.seed, KANAL.temperatur, t) - 0.5) * 0.8;
 
   return TEMPERATUR_START - TEMPERATUR_FALD * andel - p * TEMPERATUR_KULDEDYK + stoej;

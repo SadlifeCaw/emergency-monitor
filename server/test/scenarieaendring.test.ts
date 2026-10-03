@@ -38,12 +38,6 @@ describe('tilfoejHaendelse', () => {
     expect(() => tilfoejHaendelse(scenarie, langtVaek)).toThrow(/800 m/);
   });
 
-  test('afviser en haendelse uden for vagtvinduet', () => {
-    expect(() =>
-      tilfoejHaendelse(scenarie, bygAnomali({ id: 'sent', at: iso(T0 + min(400)) })),
-    ).toThrow(/perioden/i);
-  });
-
   test('afviser en sektor kortet ikke har', () => {
     expect(() =>
       tilfoejHaendelse(scenarie, bygAnomali({ id: 'a9', sektor: 12, at: iso(T0 + min(80)) })),
@@ -83,10 +77,6 @@ describe('retHaendelse', () => {
     expect(() => retHaendelse(scenarie, 'alarm-hoved', { lat: 55.72, lon: 9.47 })).toThrow(
       /m fra basen/,
     );
-  });
-
-  test('afviser at flytte en haendelse uden for vagtvinduet', () => {
-    expect(() => retHaendelse(scenarie, 'a1', { at: iso(T0 + min(500)) })).toThrow(/perioden/i);
   });
 
   test('afviser et ukendt id', () => {

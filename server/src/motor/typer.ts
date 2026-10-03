@@ -43,12 +43,6 @@ export interface Natopsaetning {
   readonly anomalierPrNat: number;
 }
 
-export interface Vagtvindue {
-  /** ISO 8601 med tidszone. */
-  readonly start: string;
-  readonly slut: string;
-}
-
 interface HaendelseFaelles {
   readonly id: string;
   /** Planlagt tidspunkt, ISO 8601 med tidszone. */
@@ -102,7 +96,6 @@ export interface Scenarie {
   readonly base: Base;
   readonly kort: Kortopsaetning;
   /** Perioden monitoren koerer i - hele kurset, ikke én nat. */
-  readonly vagt: Vagtvindue;
   readonly nat: Natopsaetning;
   /**
    * Alarmerne.

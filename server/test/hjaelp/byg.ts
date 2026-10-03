@@ -29,7 +29,6 @@ export const bygScenarie = (overskriv: Partial<Scenarie> = {}): Scenarie => ({
   seed: 20260715,
   base: { ...VORK, label: 'STATION VORK', verificeret: false },
   kort: { startZoom: 15, maxRadiusM: 800, sektorer: 8 },
-  vagt: { start: iso(T0), slut: iso(T0 + min(330)) },
   nat: { fra: '23:00', til: '05:00', anomalierPrNat: 4 },
   haendelser: [],
   ...overskriv,

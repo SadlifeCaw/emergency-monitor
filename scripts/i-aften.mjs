@@ -32,7 +32,6 @@ const TILSTAND = resolve(ROD, 'state');
 const [naar = 'nu', hastighed = '1'] = process.argv.slice(2);
 
 const plan = JSON.parse(await readFile(PLAN, 'utf8'));
-const gammelStart = new Date(plan.vagt.start);
 
 const nyStart = naar.startsWith('+')
   ? new Date(Date.now() + Number(naar.slice(1)) * 60_000)
@@ -60,8 +59,6 @@ if (Number.isNaN(nyStart.getTime())) {
   process.exit(1);
 }
 
-const forskyd = nyStart.getTime() - gammelStart.getTime();
-const flyt = (iso) => new Date(new Date(iso).getTime() + forskyd).toISOString();
 
 /**
  * Alarmen laegges ti minutter frem i stedet for at blive forskudt med resten.
@@ -78,7 +75,6 @@ const kopi = {
   navn: `${plan.navn} (flyttet)`,
   _note:
     'GENERERET af scripts/i-aften.mjs. Ret ikke i denne fil - ret i nat.json og koer scriptet igen.',
-  vagt: { start: flyt(plan.vagt.start), slut: flyt(plan.vagt.slut) },
   haendelser: plan.haendelser.map((h) =>
     h.type === 'ALARM'
       ? {
@@ -87,7 +83,7 @@ const kopi = {
             (virtuelStart ?? nyStart).getTime() + ALARM_OM_MIN * 60_000,
           ).toISOString(),
         }
-      : { ...h, at: flyt(h.at) },
+      : h,
   ),
 };
 
@@ -105,7 +101,7 @@ const alarm = kopi.haendelser.find((h) => h.type === 'ALARM');
 process.stdout.write(`
   NATTEN ER FLYTTET
 
-  Perioden begynder ${kl(kopi.vagt.start)}${virtuelStart ? `
+  Starter             ${kl(nyStart.toISOString())}${virtuelStart ? `
   Uret starter paa    ${kl(virtuelStart.toISOString())}` : ''}
   Alarmen falder    ${kl(alarm.at)}   (kan altid fyres i forvejen fra telefonen)
   Nattevindue       ${kopi.nat.fra} - ${kopi.nat.til}, ca. ${kopi.nat.anomalierPrNat} udslag pr. nat
