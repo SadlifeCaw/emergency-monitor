@@ -245,8 +245,42 @@ body[data-glitcher='ja']::after {
   }
 }
 
+/*
+ * Højttalerne er ude af drift. Ikonet står nede i højre hjørne og pulserer ikke:
+ * det skal kunne ses, ikke tiltrække sig opmærksomhed — hele pointen er, at
+ * vagtholdet selv må opdage, at de ikke længere kan høre noget.
+ *
+ * position: fixed og en fast størrelse er det, der holder det ude af layoutet.
+ * Uden dem tager svg'en hele skærmen.
+ */
 .lydfra {
   display: none;
+  position: fixed;
+  right: var(--luft-3);
+  bottom: var(--luft-3);
+  z-index: 9700;
+  box-sizing: border-box;
+  width: 3.4rem;
+  height: 3.4rem;
+  padding: 0.5rem;
+  border: 1px solid var(--rav-svag);
+  background: rgb(10 12 10 / 80%);
+  color: var(--rav);
+  pointer-events: none;
+}
+
+.lydfra svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+  fill: currentcolor;
+  stroke: currentcolor;
+  stroke-width: 1.8;
+  stroke-linecap: round;
+}
+
+.lydfra svg path:first-child {
+  stroke: none;
 }
 
 body[data-lydfra='ja'] .lydfra {
