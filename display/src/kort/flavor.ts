@@ -16,17 +16,17 @@ import { paintRules } from 'protomaps-leaflet';
 import type { LabelRule, PaintRule } from 'protomaps-leaflet';
 
 /** Baggrunden. Ikke ren sort - en anelse varm, saa skaermen ikke virker doed. */
-export const BAGGRUND = '#0a0c0a';
+export const BAGGRUND = '#0d110d';
 
-const DYBT = '#0b1410';
-const TERRAEN = '#0d1a12';
-const VAND = '#0e2a1e';
-const BYGNING = '#16281c';
-const VEJ_SMAL = '#17301f';
-const VEJ_MELLEM = '#1e4a2c';
-const VEJ_BRED = '#265f37';
-const SPOR = '#1b3a25';
-const GRAENSE = '#2a5c3a';
+const DYBT = '#101e16';
+const TERRAEN = '#13291b';
+const VAND = '#123d2c';
+const BYGNING = '#25442f';
+const VEJ_SMAL = '#26503a';
+const VEJ_MELLEM = '#33764a';
+const VEJ_BRED = '#3f9558';
+const SPOR = '#2b5e3c';
+const GRAENSE = '#418c58';
 
 /**
  * Bygger paa "black"-flavoren, saa alle 72 farvenoegler har en fornuftig

@@ -419,8 +419,8 @@ body[data-fase='ALARM'] .instrumenter {
     to bottom,
     rgb(0 0 0 / 0%) 0,
     rgb(0 0 0 / 0%) 2px,
-    rgb(0 0 0 / 22%) 3px,
-    rgb(0 0 0 / 22%) 4px
+    rgb(0 0 0 / 12%) 3px,
+    rgb(0 0 0 / 12%) 4px
   );
 }
 
@@ -428,7 +428,7 @@ body[data-fase='ALARM'] .instrumenter {
   content: '';
   position: absolute;
   inset: 0;
-  background: radial-gradient(ellipse at center, rgb(0 0 0 / 0%) 52%, rgb(0 0 0 / 55%) 100%);
+  background: radial-gradient(ellipse at center, rgb(0 0 0 / 0%) 60%, rgb(0 0 0 / 32%) 100%);
 }
 
 /* ---------------------------------------------------------------- bevægelse */

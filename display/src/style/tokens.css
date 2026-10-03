@@ -13,16 +13,16 @@
 
 :root {
   /* --- flader ------------------------------------------------------ */
-  --flade: #0a0c0a; /* næsten sort, en anelse varm */
-  --flade-hævet: #0d100d; /* paneler, knap synligt over fladen */
-  --hårlinje: rgb(51 255 106 / 16%);
-  --hårlinje-svag: rgb(51 255 106 / 8%);
+  --flade: #0d110d; /* næsten sort, en anelse varm */
+  --flade-hævet: #121712; /* paneler, knap synligt over fladen */
+  --hårlinje: rgb(51 255 106 / 26%);
+  --hårlinje-svag: rgb(51 255 106 / 14%);
 
   /* --- fosfor: levende data ---------------------------------------- */
   --fosfor: #33ff6a;
-  --fosfor-dæmpet: rgb(51 255 106 / 62%);
-  --fosfor-svag: rgb(51 255 106 / 34%);
-  --fosfor-spøgelse: rgb(51 255 106 / 14%);
+  --fosfor-dæmpet: rgb(51 255 106 / 82%);
+  --fosfor-svag: rgb(51 255 106 / 52%);
+  --fosfor-spøgelse: rgb(51 255 106 / 22%);
 
   /* --- rav: ubekræftet --------------------------------------------- */
   --rav: #ffb000;
@@ -34,7 +34,7 @@
 
   /* --- papir: arkivmateriale --------------------------------------- */
   --papir: #d8d2c2;
-  --papir-dæmpet: rgb(216 210 194 / 55%);
+  --papir-dæmpet: rgb(216 210 194 / 75%);
 
   /* --- typografi ---------------------------------------------------- */
   /*
