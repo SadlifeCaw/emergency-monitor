@@ -19,7 +19,7 @@
 // TypeScript uden afhaengigheder, saa det bundles ind uden videre - og en
 // afstand udregnet paa telefonen skal give det samme som paa skaermen.
 import { afstandM, formaterDdm, pejlingGrader, sektorFor } from '../../server/src/motor/geo.js';
-import { AdresseFejl, soegAdresse } from './adresse.js';
+import { AdresseFejl, hentKoordinat, soegAdresse } from './adresse.js';
 import type { Adressetraef } from './adresse.js';
 import type { Adminoversigt, HaendelseIOversigt } from './typer.js';
 
@@ -208,26 +208,33 @@ export const lavAlarmpanel = (
     });
   }
 
-  const vaelgTraef = (t: Adressetraef): void => {
-    lat.value = t.lat.toFixed(6);
-    lon.value = t.lon.toFixed(6);
-    f.traef.replaceChildren();
-    redigerer = true;
-    efterproev(f, graenser, serverNu);
+  const hentUrl = (url: string) => fetch(url);
+
+  const vaelgTraef = async (t: Adressetraef): Promise<void> => {
+    try {
+      const g = await hentKoordinat(t.id, hentUrl);
+      lat.value = g.lat.toFixed(6);
+      lon.value = g.lon.toFixed(6);
+      f.traef.replaceChildren();
+      redigerer = true;
+      efterproev(f, graenser, serverNu);
+    } catch (fejl) {
+      meld(fejl instanceof AdresseFejl ? fejl.message : 'Opslaget fejlede.');
+    }
   };
 
   const find = async (): Promise<void> => {
     f.traef.replaceChildren();
     f.findknap.disabled = true;
     try {
-      const fundet = await soegAdresse(f.adresse.value, graenser.base, (url) => fetch(url));
+      const fundet = await soegAdresse(f.adresse.value, hentUrl);
       if (fundet.length === 0) {
         f.traef.append(el('p', 'aflaesning', 'Ingen resultater. Prøv en anden stavemåde.'));
       }
       for (const t of fundet) {
         const knap = el('button', 'tast tast--lille tast--traef', t.navn);
         knap.type = 'button';
-        knap.addEventListener('click', () => vaelgTraef(t));
+        knap.addEventListener('click', () => void vaelgTraef(t));
         f.traef.append(knap);
       }
     } catch (fejl) {

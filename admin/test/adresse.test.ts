@@ -1,41 +1,48 @@
 import { describe, expect, test } from 'vitest';
-import { AdresseFejl, bygUrl, soegAdresse } from '../src/adresse.js';
+import { AdresseFejl, hentKoordinat, opslagUrl, soegAdresse, soegUrl } from '../src/adresse.js';
 import type { Hent } from '../src/adresse.js';
+import { utm32TilGrader } from '../src/utm.js';
 
-const BASE = { lat: 55.65831, lon: 9.359385 };
 const svar =
   (data: unknown, ok = true): Hent =>
   async () => ({ ok, json: async () => data });
 
-describe('soegAdresse', () => {
-  test('giver navn og koordinater som tal', async () => {
-    const r = await soegAdresse(
-      'Vork Bakker 12',
-      BASE,
-      svar([{ display_name: '12, Vork Bakker, Vejle', lat: '55.6583100', lon: '9.3593850' }]),
-    );
-    expect(r).toEqual([{ navn: '12, Vork Bakker, Vejle', lat: 55.65831, lon: 9.359385 }]);
+describe('utm32TilGrader', () => {
+  test('rammer Vork Bakker 12 (kontrolleret mod live Adressevaelger)', () => {
+    const { lat, lon } = utm32TilGrader(522611.35, 6168110.08);
+    expect(lat).toBeCloseTo(55.65831, 4);
+    expect(lon).toBeCloseTo(9.359385, 4);
   });
 
-  test('frasorterer traef uden brugbart koordinat', async () => {
+  test('midtermeridianen 9 grader giver praecis laengde 9', () => {
+    expect(utm32TilGrader(500000, 6200000).lon).toBeCloseTo(9, 8);
+  });
+});
+
+describe('soegAdresse', () => {
+  test('giver titel og id', async () => {
+    const r = await soegAdresse(
+      'Vork Bakker 12',
+      svar({ status: 'ok', fund: [{ type: 'husnummer', id: 'abc', titel: 'Vork Bakker 12, 7100 Vejle' }] }),
+    );
+    expect(r).toEqual([{ navn: 'Vork Bakker 12, 7100 Vejle', id: 'abc' }]);
+  });
+
+  test('frasorterer traef uden id eller titel', async () => {
     const r = await soegAdresse(
       'noget',
-      BASE,
-      svar([
-        { display_name: 'A', lat: 'x', lon: '1' },
-        { display_name: 'B', lat: '1', lon: '2' },
-      ]),
+      svar({ fund: [{ titel: 'A' }, { id: 'x' }, { id: 'b', titel: 'B' }] }),
     );
-    expect(r.map((t) => t.navn)).toEqual(['B']);
+    expect(r).toEqual([{ navn: 'B', id: 'b' }]);
   });
 
   test('afviser en for kort soegning uden at ringe ud', async () => {
     let kaldt = false;
     const hent: Hent = async () => {
       kaldt = true;
-      return { ok: true, json: async () => [] };
+      return { ok: true, json: async () => ({}) };
     };
-    await expect(soegAdresse('ab', BASE, hent)).rejects.toThrow(AdresseFejl);
+    await expect(soegAdresse('ab', hent)).rejects.toThrow(AdresseFejl);
     expect(kaldt).toBe(false);
   });
 
@@ -43,17 +50,37 @@ describe('soegAdresse', () => {
     const hent: Hent = async () => {
       throw new TypeError('Failed to fetch');
     };
-    await expect(soegAdresse('Vork Bakker', BASE, hent)).rejects.toThrow(/Ingen forbindelse/);
+    await expect(soegAdresse('Vork Bakker', hent)).rejects.toThrow(/Ingen forbindelse/);
   });
 
-  test('forklarer en fejlstatus', async () => {
-    await expect(soegAdresse('Vork Bakker', BASE, svar([], false))).rejects.toThrow(/fejlede/);
+  test('forklarer en fejlstatus og et uventet svar', async () => {
+    await expect(soegAdresse('Vork Bakker', svar({}, false))).rejects.toThrow(/fejlede/);
+    await expect(soegAdresse('Vork Bakker', svar({ status: 'fejl' }))).rejects.toThrow(/Uventet/);
   });
 
-  test('url indeholder soegning, Danmark og et omraade omkring basen', () => {
-    const url = new URL(bygUrl('Vork Bakker 12', BASE));
-    expect(url.searchParams.get('q')).toBe('Vork Bakker 12');
-    expect(url.searchParams.get('countrycodes')).toBe('dk');
-    expect(url.searchParams.get('viewbox')).toContain('9.109385');
+  test('url bruger tekst, token og et loft paa antal', () => {
+    const url = new URL(soegUrl('Vork Bakker 12'));
+    expect(url.origin).toBe('https://adressevaelger.dk');
+    expect(url.pathname).toBe('/husnumre/soeg');
+    expect(url.searchParams.get('tekst')).toBe('Vork Bakker 12');
+    expect(url.searchParams.get('token')).toBe('adressevaelger123');
+  });
+});
+
+describe('hentKoordinat', () => {
+  const husnummer = { husnummer: { adgangspunkt: { koordinater: { x: 522611.35, y: 6168110.08 } } } };
+
+  test('regner adgangspunktet om til grader', async () => {
+    const g = await hentKoordinat('abc', svar(husnummer));
+    expect(g.lat).toBeCloseTo(55.65831, 4);
+    expect(g.lon).toBeCloseTo(9.359385, 4);
+  });
+
+  test('siger fra, naar adressen mangler koordinat', async () => {
+    await expect(hentKoordinat('abc', svar({ husnummer: {} }))).rejects.toThrow(/intet koordinat/);
+  });
+
+  test('url indeholder id og token', () => {
+    expect(opslagUrl('abc')).toBe('https://adressevaelger.dk/husnumre/abc?token=adressevaelger123');
   });
 });
