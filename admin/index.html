@@ -1,0 +1,65 @@
+<!doctype html>
+<html lang="da">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <meta name="color-scheme" content="dark" />
+    <title>Natvagt — styring</title>
+  </head>
+  <body>
+    <!--
+      Statusbjælken.
+
+      Fortæller hvad monitoren gør lige nu. Markeres med form og placering,
+      ikke med lysstyrke: telefonen holdes blandt deltagerne, og en skærm der
+      lyser rødt op er en afsløring.
+    -->
+    <header class="stat" id="stat">
+      <span class="stat__mark" aria-hidden="true"></span>
+      <div class="stat__tekst">
+        <span class="stat__tilstand" id="tilstand">Forbinder</span>
+        <span class="stat__note" id="note"></span>
+      </div>
+      <span class="stat__ur" id="ur">--:--:--</span>
+    </header>
+
+    <p class="besked" id="melding" hidden></p>
+
+    <main class="rulle">
+      <section class="gruppe" id="alarmpanel"></section>
+      <section class="gruppe" id="ravage"></section>
+
+      <section class="gruppe">
+        <h2 class="legende">Alarmer</h2>
+        <div id="haendelser"></div>
+      </section>
+    </main>
+
+    <!--
+      Handlingerne ligger fast i bunden.
+
+      Øverst på en høj telefon er det sværeste sted at nå med tommelfingeren,
+      og det her betjenes med én hånd i mørke.
+    -->
+    <footer class="greb" id="handlinger"></footer>
+
+    <dialog class="adgang" id="login">
+      <form method="dialog">
+        <h2 class="legende">Adgangstoken</h2>
+        <p class="adgang__hjaelp">
+          Kør <code>npm run token</code> på maskinen, eller åbn linket fra QR-koden.
+        </p>
+        <input
+          class="vaerdifelt"
+          id="tokenfelt"
+          type="password"
+          autocomplete="off"
+          placeholder="Indsæt token"
+        />
+        <button class="tast" id="tokengem" value="gem">Gem token</button>
+      </form>
+    </dialog>
+
+    <script type="module" src="/src/main.ts"></script>
+  </body>
+</html>

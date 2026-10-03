@@ -1,0 +1,42 @@
+{
+  "name": "vase-natvagt",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "VASE Natvagt - overvaagningsmonitor til nataktivitet paa Seniorkursus Vork E26",
+  "workspaces": [
+    "server",
+    "display",
+    "admin"
+  ],
+  "scripts": {
+    "dev": "npm run build --workspaces --if-present && npm run dev --workspace server",
+    "start": "npm run start --workspace server",
+    "build": "npm run build --workspaces --if-present",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:coverage": "vitest run --coverage",
+    "typecheck": "tsc --build --force",
+    "lint": "eslint .",
+    "format": "prettier --write .",
+    "token": "node scripts/lav-token.mjs",
+    "generalprove": "npm run build --workspaces --if-present && tsx scripts/generalprove.mjs",
+    "hent-kort": "node scripts/hent-kort.mjs",
+    "adminlink": "node scripts/adminlink.mjs",
+    "i-aften": "npm run build --workspaces --if-present && tsx scripts/i-aften.mjs"
+  },
+  "devDependencies": {
+    "@types/node": "^24.3.0",
+    "@vitest/coverage-v8": "^3.2.4",
+    "eslint": "^9.34.0",
+    "prettier": "^3.6.2",
+    "tsx": "^4.20.5",
+    "typescript": "^5.9.2",
+    "typescript-eslint": "^8.41.0",
+    "vitest": "^3.2.4",
+    "@eslint/js": "^9.34.0"
+  },
+  "engines": {
+    "node": ">=22"
+  }
+}

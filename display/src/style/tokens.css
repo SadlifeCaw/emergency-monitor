@@ -1,0 +1,66 @@
+/*
+ * Designtokens for VASE Natvagt.
+ *
+ * Referencen er ikke et dashboard, men et instrument: en kurveskriver, en
+ * marineradar, en myndighedsterminal fra ca. 1988. Derfor hårfine streger
+ * frem for kort, kontinuerte kurver frem for søjler, og faste taldbredder.
+ *
+ * Én begrænsning styrer lysstyrken: deltagerne skal UD i mørket bagefter.
+ * En skærm, de har stirret på i seks timer, må ikke ødelægge deres nattesyn.
+ * Derfor ligger alt i det nederste luminansområde, og der er ingen store,
+ * lyse flader nogen steder. Al kraft er gemt til alarmen.
+ */
+
+:root {
+  /* --- flader ------------------------------------------------------ */
+  --flade: #0a0c0a; /* næsten sort, en anelse varm */
+  --flade-hævet: #0d100d; /* paneler, knap synligt over fladen */
+  --hårlinje: rgb(51 255 106 / 16%);
+  --hårlinje-svag: rgb(51 255 106 / 8%);
+
+  /* --- fosfor: levende data ---------------------------------------- */
+  --fosfor: #33ff6a;
+  --fosfor-dæmpet: rgb(51 255 106 / 62%);
+  --fosfor-svag: rgb(51 255 106 / 34%);
+  --fosfor-spøgelse: rgb(51 255 106 / 14%);
+
+  /* --- rav: ubekræftet --------------------------------------------- */
+  --rav: #ffb000;
+  --rav-svag: rgb(255 176 0 / 45%);
+
+  /* --- signal: kun ægte alarm -------------------------------------- */
+  --signal: #ff2b2b;
+  --signal-svag: rgb(255 43 43 / 40%);
+
+  /* --- papir: arkivmateriale --------------------------------------- */
+  --papir: #d8d2c2;
+  --papir-dæmpet: rgb(216 210 194 / 55%);
+
+  /* --- typografi ---------------------------------------------------- */
+  /*
+   * Ét sæt bogstaver til det hele. Ingen webfont: skærmen skal virke uden
+   * internet, og en font der ikke hentes, er en fejl der først viser sig
+   * kl. 23.30 i en lade.
+   */
+  --skrift: ui-monospace, 'Cascadia Mono', 'Consolas', 'DejaVu Sans Mono', monospace;
+
+  --spor-vid: 0.28em; /* feltnavne */
+  --spor-normal: 0.06em;
+
+  /* --- rytme -------------------------------------------------------- */
+  --luft-1: 0.35rem;
+  --luft-2: 0.7rem;
+  --luft-3: 1.15rem;
+  --luft-4: 1.8rem;
+}
+
+/*
+ * Skriftstørrelsen følger skærmen.
+ *
+ * Projektoren i lejren er ikke valgt endnu, og skærmen skal læses fra den plads
+ * deltagerne faktisk sidder - typisk 2-4 meter væk. Derfor skalerer roden med
+ * både bredde og højde, og alt andet er sat i rem.
+ */
+html {
+  font-size: clamp(13px, 0.52vw + 0.62vh, 26px);
+}

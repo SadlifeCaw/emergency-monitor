@@ -1,0 +1,24 @@
+node_modules/
+dist/
+coverage/
+*.tsbuildinfo
+
+# Koerselstilstand hoerer til den enkelte maskine, ikke til repoet
+state/
+
+# Kortet er kun 2,2 MB og ligger derfor MED i repoet, saa en klon kan koere
+# uden hentetrin. Genskabes med: npm run hent-kort
+
+# Hentede vaerktoejsbinaerer (go-pmtiles, ca. 17 MB) hoerer ikke i git
+tools/
+
+# Genereret af scripts/i-aften.mjs
+scenarios/i-aften.json
+
+# Hemmeligheder
+.env
+.env.*
+!.env.eksempel
+
+# Lokale agent-skills og indstillinger
+.claude/

@@ -1,0 +1,563 @@
+/*
+ * Styringen.
+ *
+ * Skærmen er emissiv — et instrument man stirrer på i seks timer. Det her er
+ * reflekterende: en malet feltboks, man betjener blindt i fem sekunder. Derfor
+ * afmættede farver, påtrykte legender og forsænkede felter i stedet for
+ * fosforgrønt på sort.
+ *
+ * Én begrænsning styrer alt: **telefonen holdes blandt deltagerne.** En skærm
+ * der lyser rødt op er en afsløring. Alarmtilstanden markeres derfor med form
+ * og placering — en bredere mærkestreg, en anden tekst — og aldrig med en stor
+ * lys flade. Det er det modsatte af, hvad en alarmflade normalt gør.
+ */
+
+:root {
+  --panel: #0d0f0e;
+  --bund: #080a09; /* forsænkede felter */
+  --kant: rgb(216 210 194 / 13%);
+  --kant-skarp: rgb(216 210 194 / 26%);
+
+  --ben: #d8d2c2; /* værdier man aflæser */
+  --legende: #949c94; /* påtrykt tekst */
+  --legende-svag: #5d655e;
+
+  --rolig: #4f7a5c;
+  --armeret: #c8922e;
+  --udloest: #b03636;
+
+  --skrift: ui-monospace, 'SF Mono', 'Cascadia Mono', Consolas, monospace;
+
+  /* Mindste behagelige trykflade med tommelfingeren. */
+  --tryk: 3.2rem;
+  --luft: 1rem;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  height: 100%;
+}
+
+body {
+  margin: 0;
+  /*
+   * Kun .rulle scroller.
+   *
+   * Uden det vokser body forbi skaermkanten, og grebet i bunden havner under
+   * folden - hvilket er praecis det, placeringen i tommelfingerzonen skulle
+   * loese.
+   */
+  overflow: hidden;
+  background: var(--panel);
+  color: var(--ben);
+  font-family: var(--skrift);
+  font-size: 16px;
+  line-height: 1.5;
+  -webkit-text-size-adjust: 100%;
+
+  display: grid;
+  /*
+   * Raekkerne tildeles udtrykkeligt.
+   *
+   * Beskedbjaelken er `hidden` det meste af tiden, og display:none fjerner et
+   * element helt fra gitteret - ikke bare visuelt. Med positionelle raekker
+   * rykkede alt derfor én op, `main` fik `auto` og voksede frit, og grebet fik
+   * `1fr` og blev presset til nul hoejde under skaermkanten.
+   */
+  grid-template-rows: auto auto minmax(0, 1fr) auto;
+}
+
+.stat {
+  grid-row: 1;
+}
+.besked {
+  grid-row: 2;
+}
+.rulle {
+  grid-row: 3;
+}
+.greb {
+  grid-row: 4;
+}
+
+/*
+ * Legender er påtrykt, ikke overskrifter.
+ *
+ * De sidder ved siden af eller over det, de navngiver, i den afdæmpede
+ * bengrå — som silketryk på et instrumenthus.
+ */
+.legende {
+  margin: 0;
+  color: var(--legende);
+  font-size: 0.72rem;
+  font-weight: 400;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+}
+
+.tal {
+  font-variant-numeric: tabular-nums;
+}
+
+/* ---------------------------------------------------------------- status */
+
+.stat {
+  display: flex;
+  align-items: center;
+  gap: 0.85rem;
+  padding: max(0.7rem, env(safe-area-inset-top)) var(--luft) 0.7rem;
+  border-bottom: 1px solid var(--kant);
+}
+
+/*
+ * Mærkestregen bærer tilstanden.
+ *
+ * Den skifter bredde og farve — ikke skærmens lysstyrke. Man kan se forskel
+ * på en armslængdes afstand uden at nogen bagved kan.
+ */
+.stat__mark {
+  flex: none;
+  width: 3px;
+  height: 2.1rem;
+  background: var(--legende-svag);
+  transition:
+    width 200ms ease-out,
+    background 200ms ease-out;
+}
+
+.stat[data-fase='ROLIG'] .stat__mark {
+  background: var(--rolig);
+}
+
+.stat[data-fase='OPTRAPNING'] .stat__mark {
+  width: 6px;
+  background: var(--armeret);
+}
+
+.stat[data-fase='ALARM'] .stat__mark {
+  width: 10px;
+  background: var(--udloest);
+}
+
+.stat__tekst {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.1rem;
+}
+
+.stat__tilstand {
+  font-size: 0.95rem;
+  letter-spacing: 0.02em;
+}
+
+.stat[data-fase='OPTRAPNING'] .stat__tilstand {
+  color: var(--armeret);
+}
+
+.stat[data-fase='ALARM'] .stat__tilstand {
+  color: var(--udloest);
+}
+
+.stat__note {
+  color: var(--legende-svag);
+  font-size: 0.74rem;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.stat__ur {
+  flex: none;
+  color: var(--ben);
+  font-size: 1.45rem;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 0.01em;
+  line-height: 1;
+}
+
+/* ---------------------------------------------------------------- besked */
+
+.besked {
+  margin: 0;
+  padding: 0.75rem var(--luft);
+  border-bottom: 1px solid var(--kant);
+  font-size: 0.88rem;
+  line-height: 1.45;
+  white-space: pre-line;
+}
+
+.besked[data-slags='fejl'] {
+  color: var(--udloest);
+}
+
+.besked[data-slags='ok'] {
+  color: var(--legende);
+}
+
+/* ---------------------------------------------------------------- grupper */
+
+.rulle {
+  overflow-y: auto;
+  overscroll-behavior: contain;
+}
+
+.gruppe {
+  padding: var(--luft);
+  border-bottom: 1px solid var(--kant);
+}
+
+.gruppe > .legende {
+  margin-bottom: 0.75rem;
+}
+
+/* ---------------------------------------------------------------- felter */
+
+/*
+ * Felter ligger i forsænkninger.
+ *
+ * Den mørkere bund og den lyse overkant giver dybde uden skygger — som et
+ * udfræset felt i et panel.
+ */
+.felt {
+  display: block;
+  margin-bottom: 0.7rem;
+}
+
+.felt:last-child {
+  margin-bottom: 0;
+}
+
+.felt > .legende {
+  display: block;
+  margin-bottom: 0.3rem;
+}
+
+.vaerdifelt {
+  width: 100%;
+  min-height: var(--tryk);
+  padding: 0.55rem 0.7rem;
+  border: 1px solid var(--kant);
+  border-top-color: var(--kant-skarp);
+  background: var(--bund);
+  color: var(--ben);
+  font-family: inherit;
+  font-size: 1.05rem;
+  font-variant-numeric: tabular-nums;
+}
+
+.vaerdifelt:disabled {
+  color: var(--legende-svag);
+}
+
+.vaerdifelt:focus-visible {
+  outline: 2px solid var(--armeret);
+  outline-offset: -2px;
+}
+
+.par {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.6rem;
+}
+
+/*
+ * Aflæsningen under koordinatet.
+ *
+ * Feltets vigtigste linje: et taste-slip ligner et gyldigt koordinat, men
+ * "9753 m — uden for området" ses med det samme.
+ */
+.aflaesning {
+  margin: 0.15rem 0 0.85rem;
+  min-height: 1.5em;
+  font-size: 0.86rem;
+  line-height: 1.5;
+  white-space: pre-line;
+}
+
+.aflaesning[data-slags='ok'] {
+  color: var(--legende);
+}
+
+.aflaesning[data-slags='fejl'] {
+  color: var(--udloest);
+}
+
+/* ---------------------------------------------------------------- taster */
+
+.tast {
+  width: 100%;
+  min-height: var(--tryk);
+  padding: 0.6rem 1rem;
+  border: 1px solid var(--kant-skarp);
+  border-radius: 0;
+  background: var(--bund);
+  color: var(--ben);
+  font-family: inherit;
+  font-size: 0.92rem;
+  letter-spacing: 0.1em;
+  cursor: pointer;
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.tast:active {
+  background: #10130f;
+}
+
+.tast:focus-visible {
+  outline: 2px solid var(--armeret);
+  outline-offset: -4px;
+}
+
+.tast:disabled {
+  color: var(--legende-svag);
+  border-color: var(--kant);
+}
+
+.tast--lille {
+  min-height: 2.6rem;
+  font-size: 0.78rem;
+  letter-spacing: 0.06em;
+  padding: 0.4rem 0.6rem;
+}
+
+/* ---------------------------------------------------------------- kontakter */
+
+/*
+ * Forstyrrelserne er fysiske kontakter, ikke afkrydsningsfelter.
+ *
+ * De er reversible, så de kræver ikke langt tryk — kun det, man ikke kan
+ * fortryde, gør det. Knappen bevæger sig, så man kan se hvad man gjorde uden
+ * at læse.
+ */
+.kontakt {
+  display: flex;
+  align-items: center;
+  gap: 0.9rem;
+  width: 100%;
+  min-height: var(--tryk);
+  padding: 0.5rem 0;
+  border: none;
+  background: none;
+  color: var(--ben);
+  font-family: inherit;
+  font-size: 0.92rem;
+  text-align: left;
+  cursor: pointer;
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.kontakt + .kontakt {
+  border-top: 1px solid var(--kant);
+}
+
+.kontakt__spor {
+  flex: none;
+  position: relative;
+  width: 3.1rem;
+  height: 1.55rem;
+  border: 1px solid var(--kant-skarp);
+  background: var(--bund);
+}
+
+.kontakt__knap {
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  width: calc(50% - 3px);
+  height: calc(100% - 4px);
+  background: var(--legende-svag);
+  transition:
+    transform 140ms ease-out,
+    background 140ms ease-out;
+}
+
+.kontakt[aria-checked='true'] .kontakt__knap {
+  transform: translateX(calc(100% + 2px));
+  background: var(--armeret);
+}
+
+.kontakt[aria-checked='true'] .kontakt__navn {
+  color: var(--armeret);
+}
+
+.kontakt__tekst {
+  display: flex;
+  flex-direction: column;
+  gap: 0.1rem;
+  min-width: 0;
+}
+
+.kontakt__forklaring {
+  color: var(--legende-svag);
+  font-size: 0.74rem;
+  line-height: 1.35;
+}
+
+.kontakt:focus-visible {
+  outline: 2px solid var(--armeret);
+  outline-offset: 2px;
+}
+
+/* ---------------------------------------------------------------- listen */
+
+.post {
+  display: flex;
+  align-items: baseline;
+  gap: 0.7rem;
+  padding: 0.55rem 0;
+  border-top: 1px solid var(--kant);
+  font-size: 0.84rem;
+}
+
+.post:first-child {
+  border-top: none;
+}
+
+.post__kl {
+  color: var(--ben);
+  font-variant-numeric: tabular-nums;
+}
+
+.post__navn {
+  flex: 1;
+  color: var(--legende);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.post__status {
+  color: var(--legende-svag);
+  font-size: 0.76rem;
+  font-variant-numeric: tabular-nums;
+}
+
+.tom {
+  color: var(--legende-svag);
+  font-size: 0.84rem;
+}
+
+/* ---------------------------------------------------------------- greb */
+
+/*
+ * Grebet: handlingerne, fast i tommelfingerzonen.
+ *
+ * De ligger samme sted hver gang, så man kan finde dem uden at kigge.
+ */
+.greb {
+  padding: 0.8rem var(--luft) max(0.8rem, env(safe-area-inset-bottom));
+  border-top: 1px solid var(--kant-skarp);
+  background: var(--panel);
+  display: grid;
+  gap: 0.6rem;
+}
+
+.greb--to {
+  grid-template-columns: 1fr 1fr;
+}
+
+/*
+ * Den store handling.
+ *
+ * Kræver langt tryk, fordi den ikke kan fortrydes. Fyldet vokser bagfra, så
+ * man kan se at man er i gang — og at man kan nå at slippe.
+ */
+.hovedtast {
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+  width: 100%;
+  min-height: 4.4rem;
+  padding: 0.7rem 1rem;
+  border: 1px solid currentcolor;
+  border-radius: 0;
+  background: transparent;
+  color: var(--udloest);
+  font-family: inherit;
+  font-size: 1.1rem;
+  letter-spacing: 0.14em;
+  cursor: pointer;
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.hovedtast::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  transform-origin: left center;
+  transform: scaleX(var(--fremdrift, 0));
+  background: currentcolor;
+  opacity: 0.22;
+}
+
+.hovedtast--rolig {
+  color: var(--rolig);
+}
+
+.hovedtast--rav {
+  color: var(--armeret);
+}
+
+.hovedtast--lav {
+  min-height: var(--tryk);
+  font-size: 0.92rem;
+}
+
+.hovedtast:focus-visible {
+  outline: 2px solid currentcolor;
+  outline-offset: -5px;
+}
+
+.hovedtast__navn {
+  display: block;
+}
+
+.hovedtast__hold {
+  display: block;
+  margin-top: 0.15rem;
+  color: var(--legende-svag);
+  font-size: 0.68rem;
+  letter-spacing: 0.16em;
+}
+
+/* ---------------------------------------------------------------- adgang */
+
+.adgang {
+  max-width: 22rem;
+  padding: 1.2rem;
+  border: 1px solid var(--kant-skarp);
+  background: var(--panel);
+  color: var(--ben);
+  font-family: var(--skrift);
+}
+
+.adgang::backdrop {
+  background: rgb(0 0 0 / 88%);
+}
+
+.adgang__hjaelp {
+  color: var(--legende);
+  font-size: 0.85rem;
+  line-height: 1.55;
+}
+
+.adgang .vaerdifelt {
+  margin-bottom: 0.7rem;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .stat__mark,
+  .kontakt__knap {
+    transition: none;
+  }
+}

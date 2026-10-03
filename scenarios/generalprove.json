@@ -1,0 +1,44 @@
+{
+  "version": 1,
+  "navn": "Generalproeve",
+  "seed": 20260715,
+  "_note": "Generalproeve. Samme indstillinger som nat.json. Koeres tidskomprimeret, se scripts/generalprove.mjs.",
+  "base": {
+    "lat": 55.65831,
+    "lon": 9.359385,
+    "label": "STATION VORK",
+    "verificeret": false
+  },
+  "kort": {
+    "startZoom": 15,
+    "maxRadiusM": 800,
+    "sektorer": 8
+  },
+  "_vagt": "Perioden monitoren koerer i - hele kurset, ikke én nat. Alarmer skal ligge inden for den.",
+  "vagt": {
+    "start": "2026-07-11T12:00:00+02:00",
+    "slut": "2026-07-18T12:00:00+02:00"
+  },
+  "_nat": "Hvornaar der maa ske noget af sig selv. Uden for vinduet koerer skaermen roligt videre, men der sker ingenting.",
+  "nat": {
+    "fra": "23:00",
+    "til": "05:00",
+    "anomalierPrNat": 4
+  },
+  "_haendelser": "Kun alarmer. Den her er et udgangspunkt - ret tidspunkt og koordinat fra telefonen, eller opret en ny.",
+  "haendelser": [
+    {
+      "id": "alarm-hoved",
+      "type": "ALARM",
+      "at": "2026-07-16T02:14:00+02:00",
+      "titel": "BEKRAEFTET AKTIVITET",
+      "lat": 55.6601,
+      "lon": 9.3648,
+      "usikkerhedM": 40,
+      "naermestePunkt": "P15 TREKANTSDEPOT",
+      "instruks": "UDRYK STRAKS",
+      "optrapningSek": 300,
+      "lyd": "sirene"
+    }
+  ]
+}

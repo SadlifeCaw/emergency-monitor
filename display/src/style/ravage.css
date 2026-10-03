@@ -1,0 +1,174 @@
+/*
+ * Ravage: kultens forstyrrelser af udstyret.
+ *
+ * Tre uafhængige virkemidler, som instruktørerne slår til fra telefonen.
+ * De skal se ud som om apparatet svigter — ikke som om websiden gør det.
+ *
+ * Alle tre respekterer `prefers-reduced-motion`. Skærmen står tændt i seks
+ * timer, og et vagthold, der bliver dårligt af den, kan ikke passe den.
+ */
+
+/* ------------------------------------------------------- sløret kort */
+
+/*
+ * Kun kortfliserne sløres — ikke vores egne lag.
+ *
+ * Leaflet holder baggrundskortet i .leaflet-tile-pane og vores streger i
+ * .leaflet-overlay-pane. Sløres hele kortet, forsvinder også ringene,
+ * sektorerne og alarmpunktet, og så er skærmen ikke forstyrret, den er ødelagt.
+ *
+ * Terrænet bliver ulæseligt; alt vi selv har tegnet bliver skarpt.
+ */
+body[data-sloeret='ja'] .leaflet-tile-pane {
+  filter: blur(7px) saturate(0.6);
+  transition: filter 900ms ease-in-out;
+}
+
+body[data-sloeret='ja'] #kort::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: 300;
+  pointer-events: none;
+  /* Et fint kornlag oven på sløringen, så det ligner tabt signal og ikke en
+     CSS-effekt. Mønsteret er en inline-SVG, så der hentes ingenting. */
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='120' height='120'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3'/></filter><rect width='120' height='120' filter='url(%23n)' opacity='0.28'/></svg>");
+  mix-blend-mode: overlay;
+  opacity: 0.5;
+}
+
+/* ------------------------------------------------------- skjult koordinat */
+
+/*
+ * Koordinatet sendes slet ikke, når det er slået fra — se skaermbillede.ts.
+ * Selve aflæsningen skrives af koordinattab.ts, som lader cifrene jonske efter
+ * et fix, aldrig i ro.
+ *
+ * Herfra kommer kun det, teksten ikke kan gøre selv: farven fra grønt mod det
+ * røde signal, en anelse rysten i linjen, og en RGB-adskillelse som på en
+ * modtager der taber synk. Den tidligere `clip-path`-hakning er væk — den
+ * skar tegnene vandret over og lignede en ødelagt webside frem for et apparat.
+ *
+ * `font-variant-numeric: tabular-nums` er det, der holder linjen i ro: uden den
+ * skifter bredden for hvert ciffer, og feltet sitrer i takt med opdateringen.
+ */
+.udryk__ddm[data-tabt='ja'] {
+  color: var(--signal);
+  font-variant-numeric: tabular-nums;
+  opacity: 0.82;
+  text-shadow:
+    -1px 0 rgb(255 43 43 / 55%),
+    1px 0 rgb(51 255 106 / 45%);
+  animation: koordinat-tabt 1.7s ease-in-out infinite;
+}
+
+@keyframes koordinat-tabt {
+  0%,
+  100% {
+    opacity: 0.82;
+    transform: translateX(0);
+    text-shadow:
+      -1px 0 rgb(255 43 43 / 55%),
+      1px 0 rgb(51 255 106 / 45%);
+  }
+  /* Et kort dyk, som når signalet næsten er væk. */
+  38% {
+    opacity: 0.45;
+    transform: translateX(-1px);
+    text-shadow:
+      -2px 0 rgb(255 43 43 / 70%),
+      2px 0 rgb(51 255 106 / 30%);
+  }
+  44% {
+    opacity: 0.95;
+    transform: translateX(1px);
+  }
+  72% {
+    opacity: 0.6;
+    transform: translateX(0);
+    text-shadow:
+      -1px 0 rgb(255 43 43 / 40%),
+      1px 0 rgb(51 255 106 / 60%);
+  }
+}
+
+/* ------------------------------------------------------- glitch */
+
+/*
+ * Hele skærmen sætter ud og kommer tilbage.
+ *
+ * Klassen sættes på i korte anfald af main.ts og fjernes igen — den er ikke
+ * tændt konstant. Effekten er farveadskillelse og et spring i billedet, som
+ * en gammel skærm der taber synkroniseringen.
+ */
+body[data-glitcher='ja'] {
+  animation: glitch-ryk 320ms steps(3, end) 2;
+}
+
+body[data-glitcher='ja']::after {
+  content: '';
+  position: fixed;
+  inset: 0;
+  z-index: 9800;
+  pointer-events: none;
+  background: repeating-linear-gradient(
+    to bottom,
+    rgb(51 255 106 / 6%) 0,
+    rgb(0 0 0 / 0%) 3px,
+    rgb(255 43 43 / 5%) 5px,
+    rgb(0 0 0 / 0%) 8px
+  );
+  mix-blend-mode: screen;
+  animation: glitch-baand 320ms steps(4, end) 2;
+}
+
+@keyframes glitch-ryk {
+  0% {
+    transform: translate(0);
+    filter: none;
+  }
+  25% {
+    transform: translate(-3px, 1px);
+    filter: hue-rotate(-18deg) saturate(1.6);
+  }
+  55% {
+    transform: translate(4px, -2px);
+    filter: hue-rotate(14deg) contrast(1.3);
+  }
+  80% {
+    transform: translate(-1px, 2px);
+    filter: saturate(0.4);
+  }
+  100% {
+    transform: translate(0);
+    filter: none;
+  }
+}
+
+@keyframes glitch-baand {
+  0%,
+  100% {
+    opacity: 0;
+    transform: translateY(0);
+  }
+  30% {
+    opacity: 1;
+    transform: translateY(-14%);
+  }
+  60% {
+    opacity: 0.8;
+    transform: translateY(9%);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  body[data-glitcher='ja'],
+  body[data-glitcher='ja']::after,
+  .udryk__ddm[data-tabt='ja'] {
+    animation: none;
+  }
+  /* Uden bevægelse skal det stadig kunne ses, at noget er galt. */
+  .udryk__ddm[data-tabt='ja'] {
+    opacity: 0.5;
+  }
+}

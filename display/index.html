@@ -1,0 +1,35 @@
+<!doctype html>
+<html lang="da">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>VASE Natvagt — Station Vork</title>
+  </head>
+  <body>
+    <header class="hoved" id="hoved"></header>
+
+    <div class="kortpanel">
+      <div id="kort"></div>
+      <canvas id="sweep"></canvas>
+      <div class="kortskala" id="kortskala"></div>
+    </div>
+
+    <div class="instrumenter">
+      <section class="panel" id="kurver"></section>
+      <section class="panel" id="dekryptering"></section>
+      <section class="status" id="status"></section>
+      <section class="udryk" id="udryk"></section>
+    </div>
+
+    <div class="log" id="log"></div>
+
+    <div class="alarmramme" aria-hidden="true"></div>
+    <div class="crt" aria-hidden="true"></div>
+
+    <button class="armer" id="armer" type="button">
+      Lyd er ikke aktiveret — tryk her for at armere systemet
+    </button>
+
+    <script type="module" src="/src/main.ts"></script>
+  </body>
+</html>
