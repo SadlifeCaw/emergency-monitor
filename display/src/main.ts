@@ -17,6 +17,7 @@ import './style/kort.css';
 import './style/ravage.css';
 
 import { lavGlitch } from './glitch.js';
+import { lavMaalingsglitch, maalingsglitchAktiv } from './maalingsglitch.js';
 import { lavKort } from './kort/kort.js';
 import type { Kort } from './kort/kort.js';
 import { lavLyd } from './lyd.js';
@@ -61,6 +62,9 @@ const skala = lavKortskala(felt('kortskala'));
 
 const lyd = lavLyd();
 const glitch = lavGlitch(document.body);
+const maalingsglitch = lavMaalingsglitch(
+  Array.from(document.querySelectorAll<HTMLElement>('#kurver .kurve, #dekryptering')),
+);
 const armerknap = felt('armer') as HTMLButtonElement;
 
 let kort: Kort | null = null;
@@ -138,6 +142,7 @@ const vis = (s: Skaermbillede): void => {
   // glitchen har sin egen rytme og styres derfor af et modul.
   document.body.dataset['sloeret'] = s.ravage.sloeretKort ? 'ja' : 'nej';
   glitch.saet(s.ravage.glitch);
+  maalingsglitch.saet(maalingsglitchAktiv(s.ravage.maalingsfejl, s.fase));
 
   kort ??= lavKort(kortvaert, sweepvaert, { harBasiskort });
   kort.opdater(s);

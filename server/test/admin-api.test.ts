@@ -401,6 +401,7 @@ describe('ravage', () => {
       sloeretKort: true,
       skjulKoordinat: false,
       glitch: true,
+      maalingsfejl: false,
     });
   });
 
@@ -420,6 +421,7 @@ describe('ravage', () => {
       sloeretKort: false,
       skjulKoordinat: false,
       glitch: false,
+      maalingsfejl: false,
     });
   });
 });

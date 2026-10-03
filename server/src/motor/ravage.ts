@@ -13,6 +13,8 @@
  *    bliver slet ikke sendt. Saa kan det heller ikke laeses ved at kigge med
  *    over skulderen paa noget andet.
  *  - **Glitch.** Skaermen sætter ud en gang imellem og kommer tilbage igen.
+ *  - **Maalingsforstyrrelse.** Seismik, EMF, temperatur og dekryptering glitcher
+ *    sporadisk hver for sig. Skaermen holder den selv ude under en alarm.
  *
  * De er med vilje uafhaengige. Man skal kunne skrue op for ubehaget lidt ad
  * gangen og skrue ned igen, hvis det bliver for meget.
@@ -24,12 +26,14 @@ export interface Ravage {
   readonly sloeretKort: boolean;
   readonly skjulKoordinat: boolean;
   readonly glitch: boolean;
+  readonly maalingsfejl: boolean;
 }
 
 export const tomRavage = (): Ravage => ({
   sloeretKort: false,
   skjulKoordinat: false,
   glitch: false,
+  maalingsfejl: false,
 });
 
 /**
@@ -50,6 +54,7 @@ export const saetRavage = (
     sloeretKort: aendringer.sloeretKort ?? tilstand.ravage.sloeretKort,
     skjulKoordinat: aendringer.skjulKoordinat ?? tilstand.ravage.skjulKoordinat,
     glitch: aendringer.glitch ?? tilstand.ravage.glitch,
+    maalingsfejl: aendringer.maalingsfejl ?? tilstand.ravage.maalingsfejl,
   };
 
   const uaendret = (Object.keys(ravage) as (keyof Ravage)[]).every(

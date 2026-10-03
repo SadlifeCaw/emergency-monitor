@@ -17,6 +17,7 @@ describe('tomRavage', () => {
       sloeretKort: false,
       skjulKoordinat: false,
       glitch: false,
+      maalingsfejl: false,
     });
   });
 });
@@ -65,4 +66,20 @@ describe('saetRavage', () => {
     t = saetRavage(t, tomRavage(), T0).tilstand;
     expect(t.ravage).toEqual(tomRavage());
   });
+});
+
+describe('maalingsfejl', () => {
+  const rolig = bygTilstand();
+
+  test('kan slaas til uden at roere de andre kontakter', () => {
+    const r = saetRavage(rolig, { maalingsfejl: true }, T0);
+    expect(r.tilstand.ravage).toEqual({
+      sloeretKort: false,
+      skjulKoordinat: false,
+      glitch: false,
+      maalingsfejl: true,
+    });
+    expect(r.udgaaende).toHaveLength(1);
+  });
+
 });

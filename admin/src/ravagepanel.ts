@@ -1,7 +1,7 @@
 /**
  * Forstyrrelserne.
  *
- * Tre kontakter, der saetter monitoren ud af drift. Kulten forstyrrer udstyret
+ * Kontakter, der saetter monitoren ud af drift. Kulten forstyrrer udstyret
  * - det er et virkemiddel, ikke en fejl.
  *
  * De er tegnet som fysiske kontakter og ikke som afkrydsningsfelter, fordi de
@@ -12,7 +12,7 @@
 
 import type { Adminoversigt } from './typer.js';
 
-type Navn = 'sloeretKort' | 'skjulKoordinat' | 'glitch';
+type Navn = 'sloeretKort' | 'skjulKoordinat' | 'glitch' | 'maalingsfejl';
 
 interface Kontaktdef {
   readonly navn: Navn;
@@ -35,6 +35,11 @@ const KONTAKTER: readonly Kontaktdef[] = [
     navn: 'glitch',
     titel: 'Glitch',
     forklaring: 'Skærmen sætter ud en gang imellem og kommer tilbage.',
+  },
+  {
+    navn: 'maalingsfejl',
+    titel: 'Målingsforstyrrelse',
+    forklaring: 'Seismik, EMF, temperatur og dekryptering glitcher. Ikke under alarm.',
   },
 ];
 

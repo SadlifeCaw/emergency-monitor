@@ -33,6 +33,14 @@ describe('laesTilstand', () => {
     await expect(laesTilstand(sti)).resolves.toEqual(tilstand);
   });
 
+  test('en tilstand gemt foer maalingsforstyrrelsen fandtes faar den slaaet fra', async () => {
+    const gammel = bygTilstand();
+    const { maalingsfejl: _vaek, ...uden } = gammel.ravage;
+    await writeFile(sti, JSON.stringify({ ...gammel, ravage: uden }), 'utf8');
+    const igen = await laesTilstand(sti);
+    expect(igen?.ravage.maalingsfejl).toBe(false);
+  });
+
   test('bevarer aktivAlarm og fyrede gennem en runde paa disken', async () => {
     const tilstand = bygTilstand({
       fase: 'ALARM',

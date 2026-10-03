@@ -41,6 +41,7 @@ const ravageSkema = z.object({
   sloeretKort: z.boolean().optional(),
   skjulKoordinat: z.boolean().optional(),
   glitch: z.boolean().optional(),
+  maalingsfejl: z.boolean().optional(),
 });
 
 /**

@@ -172,3 +172,75 @@ body[data-glitcher='ja']::after {
     opacity: 0.5;
   }
 }
+
+/* ------------------------------------------------------- målingsforstyrrelse */
+
+/*
+ * Et enkelt instrument — en kurve eller dekrypteringen — taber signalet et
+ * øjeblik. maalingsglitch.ts sætter attributten på og tager den af igen, hvert
+ * instrument for sig og tilfældigt. Under alarm bliver den aldrig sat.
+ *
+ * Effekten er rykkende, ikke blød: tal der flakker, en RGB-adskillelse og et
+ * kort dropout, som på en føler der mister forbindelsen.
+ */
+[data-maalingsfejl='ja'] {
+  animation: maaling-tab 260ms steps(2, end) infinite;
+}
+
+[data-maalingsfejl='ja'] canvas,
+[data-maalingsfejl='ja'] .dekryptering__fragment {
+  filter: hue-rotate(-40deg) saturate(1.8) contrast(1.4);
+}
+
+[data-maalingsfejl='ja'] .kurve__vaerdi,
+[data-maalingsfejl='ja'] .tal {
+  color: var(--rav);
+  animation: maaling-tal 180ms steps(2, end) infinite;
+}
+
+@keyframes maaling-tab {
+  0% {
+    transform: translate(0);
+    opacity: 1;
+  }
+  25% {
+    transform: translate(-3px, 0);
+    opacity: 0.35;
+    text-shadow:
+      -2px 0 rgb(255 43 43 / 60%),
+      2px 0 rgb(51 255 106 / 50%);
+  }
+  50% {
+    transform: translate(4px, 1px);
+    opacity: 0.9;
+  }
+  75% {
+    transform: translate(-1px, -1px);
+    opacity: 0.2;
+  }
+  100% {
+    transform: translate(0);
+    opacity: 0.8;
+  }
+}
+
+@keyframes maaling-tal {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.15;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  [data-maalingsfejl='ja'],
+  [data-maalingsfejl='ja'] .kurve__vaerdi,
+  [data-maalingsfejl='ja'] .tal {
+    animation: none;
+  }
+  [data-maalingsfejl='ja'] {
+    opacity: 0.5;
+  }
+}
