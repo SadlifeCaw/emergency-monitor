@@ -10,8 +10,8 @@
     "verificeret": false
   },
   "kort": {
-    "startZoom": 14,
-    "maxRadiusM": 2000,
+    "startZoom": 13,
+    "maxRadiusM": 3000,
     "sektorer": 8
   },
   "_vagt": "Perioden monitoren koerer i - hele kurset, ikke én nat. Alarmer skal ligge inden for den.",

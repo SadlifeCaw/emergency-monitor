@@ -27,7 +27,7 @@ const MAAL = join(ROD, 'assets/maps/vork.pmtiles');
 /** Protomaps' basemap-build gaar til zoom 15; derover overzoomer vi i browseren. */
 const MAKS_ZOOM = 15;
 /** Hvor meget kort ud over alarmradius. Skaermen skal vise omgivelser, ikke kun en cirkel. */
-const STANDARD_MARGIN_M = 3000;
+const STANDARD_MARGIN_M = 4500;
 
 const log = (besked) => process.stdout.write(`${besked}\n`);
 

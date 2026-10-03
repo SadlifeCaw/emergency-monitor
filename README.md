@@ -152,6 +152,6 @@ start.bat -FjernAutostart   # fortryd
 start.bat -UdenBrowser      # kun serveren
 ```
 
-Kortet dækker nu en radius på **2000 m** (`kort.maxRadiusM` i `scenarios/nat.json`,
-start-zoom 14). Kortfilen rækker 3000 m fra basen; ønskes mere, hæv radius og kør
-`npm run hent-kort -- --margin 6000`.
+Kortet dækker nu en radius på **3000 m** (`kort.maxRadiusM` i `scenarios/nat.json`,
+start-zoom 13). Kortfilen rækker 4500 m fra basen; ønskes mere, hæv radius og kør
+`npm run hent-kort -- --margin 7000`.
