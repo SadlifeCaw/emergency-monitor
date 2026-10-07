@@ -10,6 +10,36 @@ synligt på kortet. Vagtholdet skal derefter hurtigst muligt rykke ud mod punkte
 Deltagerne har **hverken mus eller tastatur**. Skærmen skal derfor køre helt
 autonomt hele natten uden menneskelig indgriben.
 
+## Systemet
+
+```mermaid
+flowchart TB
+    admin["📱 ADMIN<br/>telefon"]
+    skaerm["🖥️ SKÆRM<br/>projektor/TV · kiosk-Chrome<br/>(ingen mus eller tastatur)"]
+
+    subgraph pc["Lokal PC i lejren · én Node-proces (Fastify) · ingen internet i drift"]
+        direction TB
+        api["HTTP API<br/>/api/state · /api/admin/*"]
+        motor["Scenarie-motor<br/>tick 1 Hz"]
+        ws["WebSocket-broadcast"]
+        state[("state/runtime.json<br/>skrives atomisk")]
+        plan[("scenarios/nat.json<br/>planen, rør den ikke")]
+        stat["static/<br/>skærm + admin + vejle.pmtiles"]
+
+        api --> motor
+        motor --> ws
+        motor <--> state
+        plan --> motor
+    end
+
+    admin -- "HTTP over LAN<br/>Bearer-token" --> api
+    ws -- "WebSocket" --> skaerm
+    stat -. "bygget frontend + offline-kort" .-> skaerm
+```
+
+Skærmen kører på `localhost` og er upåvirket af netværket. Falder wifi ud, kører
+natten videre efter planen — kun admin-styringen holder op med at virke.
+
 ## Dokumenter
 
 | Fil | Indhold |
