@@ -10,6 +10,16 @@ synligt på kortet. Vagtholdet skal derefter hurtigst muligt rykke ud mod punkte
 Deltagerne har **hverken mus eller tastatur**. Skærmen skal derfor køre helt
 autonomt hele natten uden menneskelig indgriben.
 
+## Sådan ser det ud
+
+Skærmen under en rolig vagt: radarsweep over det offline kort, målinger til højre.
+
+![Skærmen under en rolig vagt](docs/img/skaerm-rolig.png)
+
+Når alarmen udløses: afstand, pejling og koordinat til punktet.
+
+![Skærmen under alarm](docs/img/skaerm-alarm.png)
+
 ## Systemet
 
 ```mermaid
