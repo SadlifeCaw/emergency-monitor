@@ -19,7 +19,7 @@ const FASETEKST: Record<string, string> = {
 
 export const lavHovedpanel = (vaert: HTMLElement): Panel => {
   const navn = el('span', 'hoved__navn', 'VASE NATVAGT');
-  const station = el('span', 'felt', 'Station Vork');
+  const station = el('span', 'felt', 'Station');
   const ur = el('span', 'hoved__ur', '--:--:--');
 
   const vagtholdNavn = el('span', 'felt', 'Vagthold');
@@ -42,6 +42,8 @@ export const lavHovedpanel = (vaert: HTMLElement): Panel => {
 
   return {
     opdater: (s) => {
+      // Stedets navn kommer fra scenariet, saa en kreds' egen radar ikke staar som "Vork".
+      saetTekst(station, s.base.label);
       saetTekst(ur, lokalTid(s.serverKl));
       saetTekst(vagthold, s.vagthold);
       saetTekst(fase, FASETEKST[s.fase] ?? s.fase);
