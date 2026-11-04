@@ -32,6 +32,25 @@ const KORTFIL = '/kort/vork.pmtiles';
 const MAKS_DATAZOOM = 15;
 /** Hvor meget luft der er om basen og alarmpunktet, naar kortet flytter blikket. */
 const ALARM_LUFT = 0.6;
+/** Standardvisningen: kortet viser 1500 m rundt om centrum. */
+const STANDARD_RADIUS_M = 1500;
+const METER_PR_GRAD = 111_320;
+
+/** Saetter kortet til standardvisningen: STANDARD_RADIUS_M rundt om basen. */
+const visStandard = (kort: L.Map, base: Punkt, animate: boolean): void => {
+  const dLat = STANDARD_RADIUS_M / METER_PR_GRAD;
+  const dLon = STANDARD_RADIUS_M / (METER_PR_GRAD * Math.cos((base.lat * Math.PI) / 180));
+  kort.fitBounds(
+    [
+      [base.lat - dLat, base.lon - dLon],
+      [base.lat + dLat, base.lon + dLon],
+    ],
+    { animate, padding: [0, 0] },
+  );
+};
+/** Luft om taarnene. Mindre end ved alarmen: her er det punkterne, der skal fylde. */
+const TAARN_LUFT = 0.25;
+const TAARN_MAKS_ZOOM = 16;
 
 export interface Kortopsaetning {
   /** Falsk naar assets/maps/vork.pmtiles mangler. Saa tegnes et noedgitter i stedet. */
@@ -82,6 +101,7 @@ const tilfoejBasiskort = (kort: L.Map): void => {
 const byg = (vaert: HTMLElement, opsaetning: Kortopsaetning, s: Skaermbillede): Kortdele => {
   const base: Punkt = { lat: s.base.lat, lon: s.base.lon };
   const kort = lavLeafletkort(vaert, base, s.kort.startZoom);
+  visStandard(kort, base, false);
 
   if (opsaetning.harBasiskort) {
     tilfoejBasiskort(kort);
@@ -106,7 +126,7 @@ const opdaterAlarm = (dele: Kortdele, s: Skaermbillede): void => {
 
   if (!s.alarm) {
     if (overlays.ryddAlarm()) {
-      kort.setView([base.lat, base.lon], dele.startZoom, { animate: true });
+      visStandard(kort, base, true);
     }
     return;
   }
@@ -118,6 +138,30 @@ const opdaterAlarm = (dele: Kortdele, s: Skaermbillede): void => {
   kort.flyToBounds(
     L.latLngBounds([base.lat, base.lon], [s.alarm.lat, s.alarm.lon]).pad(ALARM_LUFT),
     { duration: 2.5 },
+  );
+};
+
+/**
+ * Signaltaarne: kortet zoomer ind, saa centrum og alle taarne er i billedet.
+ *
+ * Det sker, naar taarnene dukker op eller flytter sig (respawn) - ikke naar de
+ * skifter farve. Slaas de fra, vender kortet tilbage til udgangspunktet.
+ */
+const opdaterTaarne = (dele: Kortdele, s: Skaermbillede): void => {
+  const { kort, base, overlays } = dele;
+  const taarne = s.udvidelse?.taarne ?? [];
+  if (!overlays.visTaarne(taarne) || s.alarm) return;
+
+  if (taarne.length === 0) {
+    visStandard(kort, base, true);
+    return;
+  }
+
+  kort.flyToBounds(
+    L.latLngBounds([[base.lat, base.lon], ...taarne.map((t): [number, number] => [t.lat, t.lon])]).pad(
+      TAARN_LUFT,
+    ),
+    { duration: 2, maxZoom: TAARN_MAKS_ZOOM },
   );
 };
 
@@ -170,6 +214,7 @@ export const lavKort = (
     opdater: (s) => {
       dele ??= byg(vaert, opsaetning, s);
       opdaterAlarm(dele, s);
+      opdaterTaarne(dele, s);
       dele.overlays.visAnomalier(s.anomalier.map((a) => a.sektor));
     },
 

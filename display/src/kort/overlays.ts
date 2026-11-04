@@ -166,7 +166,67 @@ export const lavAnomalilag = (
     ),
   );
 
-export const FARVER = { FOSFOR, ALARM, RAV } as const;
+export interface Taarnpunkt {
+  readonly id: string;
+  readonly titel: string;
+  readonly lat: number;
+  readonly lon: number;
+  readonly afstandM: number;
+  readonly pejlingGrader: number;
+  readonly aktiv: boolean;
+}
+
+/** Signaltaarnenes inaktive farve. Oranget skiller sig fra ravens gule alarmer. */
+const ORANGE = '#ff8a00';
+
+/**
+ * Signaltaarne: orange, til de er sat korrekt, og groenne, naar de er aktive.
+ * De staar paa kortet hele tiden og skifter farve, naar de aktiveres.
+ */
+export const lavTaarnlag = (base: Punkt, taarne: readonly Taarnpunkt[]): L.LayerGroup =>
+  L.layerGroup(
+    taarne.flatMap((t): L.Layer[] => {
+      const farve = t.aktiv ? FOSFOR : ORANGE;
+      const punkt: Punkt = { lat: t.lat, lon: t.lon };
+      const stand = t.aktiv ? 'kort-taarn--aktiv' : 'kort-taarn--inaktiv';
+      return [
+        // Stiplet linje fra centrum ud til taarnet - samme farve som taarnet.
+        L.polyline([tilLatLng(base), tilLatLng(punkt)], {
+          color: farve,
+          weight: t.aktiv ? 1.6 : 1.2,
+          opacity: 0.75,
+          dashArray: '7 7',
+          interactive: false,
+        }),
+        L.circle(tilLatLng(punkt), {
+          radius: 60,
+          color: farve,
+          weight: 1.5,
+          opacity: 0.85,
+          fillColor: farve,
+          fillOpacity: 0.15,
+          interactive: false,
+          className: stand,
+        }),
+        L.circleMarker(tilLatLng(punkt), {
+          radius: 7,
+          color: farve,
+          weight: 2,
+          fillColor: farve,
+          fillOpacity: 1,
+          interactive: false,
+          className: stand,
+        }),
+        maerkat(
+          punkt,
+          `${t.titel} &middot; ${t.afstandM} m &middot; ${String(t.pejlingGrader).padStart(3, '0')}&deg;`,
+          `kort-maerkat--taarn ${t.aktiv ? 'kort-maerkat--taarn-aktiv' : ''}`,
+        ),
+      ];
+    }),
+  );
+
+export const FARVER = { FOSFOR, ALARM, RAV, ORANGE } as const;
 
 /**
  * Nødgitter: bruges naar der ikke er noget basiskort.
@@ -215,6 +275,11 @@ export interface Overlaystyring {
   visAlarm(alarm: Alarmpunkt & { haendelseId: string }): boolean;
   ryddAlarm(): boolean;
   visAnomalier(sektorer: readonly number[]): void;
+  /**
+   * Tegner signaltaarnene forfra, naar noget ved dem er aendret.
+   * Returnerer true, hvis taarnenes PLACERING aendrede sig (ikke blot farven).
+   */
+  visTaarne(taarne: readonly Taarnpunkt[]): boolean;
 }
 
 /**
@@ -233,6 +298,9 @@ export const lavOverlaystyring = (
   let alarmlag: L.LayerGroup | null = null;
   let anomalilag: L.LayerGroup | null = null;
   let alarmId: string | null = null;
+  let taarnlag: L.LayerGroup | null = null;
+  let taarnNoegle = '';
+  let taarnPlacering = '';
 
   return {
     /** Returnerer true, hvis alarmen er ny og kortet derfor skal flytte blikket. */
@@ -251,6 +319,20 @@ export const lavOverlaystyring = (
       alarmlag = null;
       alarmId = null;
       return true;
+    },
+
+    visTaarne: (taarne) => {
+      const noegle = taarne
+        .map((t) => `${t.id}:${t.aktiv ? 1 : 0}:${t.lat}:${t.lon}:${t.titel}`)
+        .join('|');
+      const placering = taarne.map((t) => `${t.id}:${t.lat}:${t.lon}`).join('|');
+      const flyttet = placering !== taarnPlacering;
+      taarnPlacering = placering;
+      if (noegle === taarnNoegle) return flyttet;
+      taarnNoegle = noegle;
+      if (taarnlag) kort.removeLayer(taarnlag);
+      taarnlag = taarne.length ? lavTaarnlag(base, taarne).addTo(kort) : null;
+      return flyttet;
     },
 
     visAnomalier: (sektorer) => {

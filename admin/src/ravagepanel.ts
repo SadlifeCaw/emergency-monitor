@@ -12,7 +12,7 @@
 
 import type { Adminoversigt } from './typer.js';
 
-type Navn = 'sloeretKort' | 'skjulKoordinat' | 'glitch' | 'maalingsfejl' | 'lydFra';
+type Navn = 'sloeretKort' | 'skjulKoordinat' | 'glitch' | 'maalingsfejl' | 'lydFra' | 'signalfejl';
 
 interface Kontaktdef {
   readonly navn: Navn;
@@ -40,6 +40,11 @@ const KONTAKTER: readonly Kontaktdef[] = [
     navn: 'maalingsfejl',
     titel: 'Målingsforstyrrelse',
     forklaring: 'Seismik, EMF, temperatur og dekryptering glitcher. Ikke under alarm.',
+  },
+  {
+    navn: 'signalfejl',
+    titel: 'Signalfejl',
+    forklaring: 'Automatisk signalopfangning er ude. Kun manuel signalhåndtering virker.',
   },
   {
     navn: 'lydFra',

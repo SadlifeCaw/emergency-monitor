@@ -4,9 +4,9 @@
   "seed": 20260715,
   "_note": "INDSTILLINGER, ikke et manuskript. Anomalier og dekryptering genereres af uret (server/src/motor/stemning.ts) og staar derfor ikke her. Listen indeholder kun alarmer, og dem opretter instruktoererne selv fra telefonen. ARBEJDSUDKAST: datoer og koordinater skal laases i fase 0.",
   "base": {
-    "lat": 55.65831,
-    "lon": 9.359385,
-    "label": "STATION VORK",
+    "lat": 55.674928,
+    "lon": 9.347811,
+    "label": "RAVNINGBROEN",
     "verificeret": false
   },
   "kort": {

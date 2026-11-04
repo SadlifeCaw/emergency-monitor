@@ -39,10 +39,12 @@ const tilstandSkema = z.object({
       // Standard, saa en tilstand gemt foer kontakten fandtes stadig kan laeses.
       maalingsfejl: z.boolean().default(false),
       lydFra: z.boolean().default(false),
+      signalfejl: z.boolean().default(false),
     })
     .default({ sloeretKort: false, skjulKoordinat: false, glitch: false,
       maalingsfejl: false,
       lydFra: false,
+      signalfejl: false,
     }),
 });
 

@@ -12,6 +12,7 @@ import { aflaes } from '../motor/telemetri.js';
 import type { Loglinje, Sensoraflaesning } from '../motor/telemetri.js';
 import type { Ravage } from '../motor/ravage.js';
 import type { Fase, Scenarie, Tilstand } from '../motor/typer.js';
+import type { UdvidelseVisning } from '../udvidelse/udvidelse.js';
 
 export interface AlarmVisning {
   readonly haendelseId: string;
@@ -69,6 +70,30 @@ export interface AnomaliVisning {
   readonly sektor: number;
 }
 
+/**
+ * Lydklippet skaermen skal spille.
+ *
+ * Serveren kender ikke klippets laengde og behoever det ikke: skaermen spiller
+ * filen og ved selv, hvornaar den er slut. `sekunderSiden` bruges kun til at
+ * genoptage midt i klippet, hvis skaermen blev genindlaest undervejs.
+ */
+export interface LydklipVisning {
+  readonly haendelseId: string;
+  readonly titel: string;
+  readonly fil: string;
+  readonly sekunderSiden: number;
+  /** Hvor langt inde i klippet stemmen starter. Mangler = fra begyndelsen. */
+  readonly startSek?: number;
+}
+
+/**
+ * Hvor laenge et fyret klip bliver ved med at ligge i skaermbilledet.
+ *
+ * Skaermen er hele tiden selv herre over, om klippet stadig spiller. Vinduet
+ * er kun et loft, saa et klip fra i gaar ikke genstarter ved en genstart.
+ */
+export const LYDKLIP_VINDUE_SEK = 30 * 60;
+
 export interface Skaermbillede {
   /** Serverens ur er sandheden. Skaermen regner sin egen afvigelse ud herfra. */
   readonly serverKl: string;
@@ -82,8 +107,15 @@ export interface Skaermbillede {
   readonly dekryptering: { readonly procent: number; readonly fragment: string };
   readonly anomalier: readonly AnomaliVisning[];
   readonly alarm: AlarmVisning | null;
+  /** Det seneste fyrede lydklip, mens det stadig kan vaere i gang. Ellers null. */
+  readonly lydklip: LydklipVisning | null;
   /** Instruktoerernes forstyrrelser. Skaermen reagerer paa dem, se style/ravage.css. */
   readonly ravage: Ravage;
+  /**
+   * Udvidelsespakken (signaltaarne). Null saa laenge pakken ikke er aktiveret -
+   * saa er skaermbilledet identisk med foer pakken fandtes.
+   */
+  readonly udvidelse: UdvidelseVisning | null;
 }
 
 export const bygAlarmvisning = (
@@ -124,12 +156,41 @@ export const bygAlarmvisning = (
   };
 };
 
+/** Det senest fyrede lydklip inden for vinduet, eller null. */
+export const bygLydklip = (
+  scenarie: Scenarie,
+  tilstand: Tilstand,
+  nu: number,
+): LydklipVisning | null => {
+  let bedst: { vis: LydklipVisning; fyretMs: number } | null = null;
+
+  for (const h of scenarie.haendelser) {
+    if (h.type !== 'LYD') continue;
+    const fyret = tilstand.fyrede[h.id];
+    if (!fyret) continue;
+
+    const fyretMs = Date.parse(fyret.fyretKl);
+    const sekunderSiden = Math.max(0, Math.floor((nu - fyretMs) / 1000));
+    if (sekunderSiden > LYDKLIP_VINDUE_SEK) continue;
+    if (bedst && bedst.fyretMs > fyretMs) continue;
+
+    bedst = {
+      fyretMs,
+      vis: { haendelseId: h.id, titel: h.titel, fil: h.fil, sekunderSiden },
+    };
+  }
+
+  return bedst?.vis ?? null;
+};
+
 /** Den anomali der er i gang lige nu, som en liste med nul eller ét element. */
 const stemningsanomalier = (
   scenarie: Scenarie,
   tilstand: Tilstand,
   nu: number,
 ): readonly AnomaliVisning[] => {
+  // Signalfejl: den automatiske opfangning er ude, saa radaren finder intet selv.
+  if (tilstand.ravage.signalfejl) return [];
   const a = anomaliNu(stemningFra(scenarie), nu, tilstand.aktivAlarm !== null);
   return a ? [{ id: a.id, titel: a.titel, tekst: a.tekst, sektor: a.sektor }] : [];
 };
@@ -139,6 +200,7 @@ export const bygSkaermbillede = (
   tilstand: Tilstand,
   visning: Visning,
   nu: number,
+  udvidelse: UdvidelseVisning | null = null,
 ): Skaermbillede => ({
   serverKl: new Date(nu).toISOString(),
   fase: tilstand.fase,
@@ -153,5 +215,16 @@ export const bygSkaermbillede = (
   // motor/stemning.ts - det er derfor der ikke er nogen liste at vedligeholde.
   anomalier: stemningsanomalier(scenarie, tilstand, nu),
   alarm: bygAlarmvisning(scenarie, tilstand, nu),
+  // Er alle signaltaarne aktive, er det forbindelsen der spiller - ikke et planlagt klip.
+  lydklip: udvidelse?.forbindelse
+    ? {
+        haendelseId: udvidelse.forbindelse.id,
+        titel: udvidelse.forbindelse.titel,
+        fil: udvidelse.forbindelse.fil,
+        sekunderSiden: udvidelse.forbindelse.sekunderSiden,
+        startSek: udvidelse.forbindelse.startSek,
+      }
+    : bygLydklip(scenarie, tilstand, nu),
   ravage: tilstand.ravage,
+  udvidelse,
 });

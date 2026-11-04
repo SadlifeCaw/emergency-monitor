@@ -20,7 +20,10 @@ import { glemToken, gemToken, hentToken, kald } from './api.js';
 import { lokalTid } from '../../display/src/format.js';
 import { lavAlarmpanel } from './alarmpanel.js';
 import { lavLangtryk } from './langtryk.js';
+import { lavLydpanel } from './lydpanel.js';
 import { lavRavagepanel } from './ravagepanel.js';
+import { lavSignalpanel } from './signalpanel.js';
+import { lavTaarnpanel } from './taarnpanel.js';
 import type { Adminoversigt, HaendelseIOversigt } from './typer.js';
 
 /** Hvor ofte overblikket hentes. Nedtællingen tikker lokalt imellem. */
@@ -94,8 +97,47 @@ const alarmpanel = lavAlarmpanel(felt('alarmpanel'), {
   serverNu: () => serverNu(),
 });
 
+const lydpanel = lavLydpanel(felt('lydpanel'), {
+  opret: (klip) => kommando('../api/admin/haendelse', 'POST', klip),
+  aflys: (id) => kommando(`../api/admin/haendelse/${id}`, 'DELETE'),
+  filer: async () => {
+    const svar = await kald<{ mappe: string; filer: string[] }>('../api/admin/lydfiler');
+    return svar.ok ? svar.data : null;
+  },
+  meld: (tekst) => visMelding(tekst, 'ok'),
+  serverNu: () => serverNu(),
+});
+
 const ravagepanel = lavRavagepanel(felt('ravage'), {
   saet: (aendringer) => kommando('../api/admin/ravage', 'POST', aendringer),
+});
+
+const signalpanel = lavSignalpanel(felt('signalpanel'), {
+  pakke: (aendring) => kommando('../api/admin/udvidelse/pakke', 'POST', aendring),
+});
+
+const taarnsti = (id: string, handling: string): string =>
+  `../api/admin/udvidelse/taarn/${encodeURIComponent(id)}/${handling}`;
+
+const taarnpanel = lavTaarnpanel(felt('taarnpanel'), {
+  gem: (taarn) => kommando('../api/admin/udvidelse/taarn', 'POST', taarn),
+  slet: (id) => kommando(`../api/admin/udvidelse/taarn/${encodeURIComponent(id)}`, 'DELETE'),
+  respawn: (id) => kommando(taarnsti(id, 'respawn'), 'POST'),
+  aktiver: (id) => kommando(taarnsti(id, 'aktiver'), 'POST'),
+  deaktiver: (id) => kommando(taarnsti(id, 'deaktiver'), 'POST'),
+  kode: (id) => kommando(taarnsti(id, 'kode'), 'POST'),
+  saetLyd: (fil) => kommando('../api/admin/udvidelse/pakke', 'POST', { taarnLyd: fil }),
+  saetTil: (til) => kommando('../api/admin/udvidelse/pakke', 'POST', { taarnAktiv: til }),
+  lydNulstil: () => kommando('../api/admin/udvidelse/lyd/nulstil', 'POST'),
+  koder: async () => {
+    const svar = await kald<{ filer: string[] }>('../api/admin/koder');
+    return svar.ok ? svar.data : null;
+  },
+  lydfiler: async () => {
+    const svar = await kald<{ filer: string[] }>('../api/admin/lydfiler');
+    return svar.ok ? svar.data : null;
+  },
+  meld: (tekst) => visMelding(tekst, 'ok'),
 });
 
 const saetOversigt = (ny: Adminoversigt): void => {
@@ -187,8 +229,9 @@ const noten = (o: Adminoversigt): string => {
     const siden = nedtaelling((serverNu() - Date.parse(o.aktivAlarm.fyretKl)) / 1000);
     return o.aktivAlarm.kvitteretKl ? `Kvitteret · ${siden}` : `Udløst for ${siden} siden`;
   }
-  if (o.naeste) {
-    return `Næste om ${nedtaelling((Date.parse(o.naeste.at) - serverNu()) / 1000)}`;
+  const alarm = o.haendelser.find((h) => h.type === 'ALARM' && h.kanFyres);
+  if (alarm) {
+    return `Næste om ${nedtaelling((Date.parse(alarm.at) - serverNu()) / 1000)}`;
   }
   return 'Ingen alarm klar';
 };
@@ -214,7 +257,12 @@ const tegn = (): void => {
   notefelt.textContent = noten(o);
 
   alarmpanel.opdater(o);
+  lydpanel.opdater(o);
+  // Lydklip hoerer til signaltaarnene: de vises kun, naar udvidelsespakken er til.
+  felt('lydpanel').toggleAttribute('hidden', !o.udvidelse?.aktiv);
   ravagepanel.opdater(o);
+  taarnpanel.opdater(o);
+  signalpanel.opdater(o);
   tegnGreb(o);
 
   listefelt.replaceChildren(
@@ -231,12 +279,14 @@ felt('tokengem').addEventListener('click', () => {
   if (vaerdi) {
     gemToken(vaerdi);
     void hent();
+    void lydpanel.hentFiler();
   }
 });
 
 if (!hentToken()) login.showModal();
 
 void hent();
+void lydpanel.hentFiler();
 window.setInterval(() => void hent(), HENT_MS);
 // Uret og nedtællingerne løber lokalt, så de er bløde mellem opdateringerne.
 window.setInterval(tegn, 1000);

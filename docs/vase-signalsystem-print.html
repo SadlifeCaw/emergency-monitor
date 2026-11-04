@@ -1,0 +1,328 @@
+<!doctype html>
+<html lang="da">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>VASE Signalhåndtering — print (for- og bagside)</title>
+<style>
+  /*
+   * Til print: A4, for- og bagside.
+   * Udskriv med "Begge sider" / "Vend på langsiden", marginer: standard,
+   * og slå "Baggrundsgrafik" til, så stemplet og boksene kommer med.
+   */
+  @page { size: A4 portrait; margin: 0; }
+
+  :root {
+    --ink: #151815;
+    --groen: #0d6b2a;
+    --rav: #8a5a00;
+    --orange: #b35a00;
+    --signal: #a31515;
+    --haar: #9aa39a;
+    --svag: #5c645c;
+  }
+
+  * { box-sizing: border-box; }
+  html { background: #6b6f6b; }
+  body {
+    margin: 0;
+    color: var(--ink);
+    font: 11.5pt/1.45 ui-monospace, 'Cascadia Mono', Consolas, 'DejaVu Sans Mono', monospace;
+  }
+
+  /* ---- ét ark = én side ---- */
+  .side {
+    position: relative;
+    width: 210mm;
+    height: 297mm;
+    margin: 8mm auto;
+    padding: 14mm 15mm 12mm;
+    background: #fff;
+    overflow: hidden;
+    break-after: page;
+    page-break-after: always;
+    display: flex;
+    flex-direction: column;
+  }
+  .side:last-child { break-after: auto; page-break-after: auto; }
+
+  @media print {
+    html { background: #fff; }
+    .side { margin: 0; box-shadow: none; }
+  }
+
+  /* ---- brevhoved ---- */
+  .hoved {
+    display: flex;
+    justify-content: space-between;
+    border-bottom: 1.5px solid var(--ink);
+    padding-bottom: 2mm;
+    font-size: 8.5pt;
+    letter-spacing: .26em;
+    text-transform: uppercase;
+  }
+  .hoved b { font-weight: 700; color: var(--groen); }
+
+  .titel { position: relative; margin: 6mm 0 1mm; }
+  h1 {
+    margin: 0;
+    font-size: 27pt;
+    letter-spacing: .12em;
+    line-height: 1.1;
+    font-weight: 800;
+  }
+  .under { margin: 1mm 0 0; letter-spacing: .26em; font-size: 9pt; color: var(--rav); text-transform: uppercase; font-weight: 700; }
+
+  .stempel {
+    position: absolute;
+    right: 2mm;
+    top: 0;
+    transform: rotate(-6deg);
+    border: 2px solid var(--signal);
+    color: var(--signal);
+    padding: 1mm 3mm;
+    font-size: 8.5pt;
+    letter-spacing: .26em;
+    font-weight: 800;
+    text-align: center;
+    line-height: 1.35;
+  }
+
+  .rune {
+    margin: 4mm 0 3mm;
+    text-align: center;
+    letter-spacing: .9em;
+    color: var(--haar);
+    font-size: 10pt;
+    white-space: nowrap;
+  }
+
+  h2 {
+    display: flex;
+    align-items: center;
+    gap: 3mm;
+    margin: 5mm 0 2.5mm;
+    font-size: 9.5pt;
+    letter-spacing: .28em;
+    text-transform: uppercase;
+    font-weight: 800;
+  }
+  h2::before { content: ''; width: 2mm; height: 4mm; background: var(--rav); }
+  h2::after { content: ''; flex: 1; border-top: 1px solid var(--haar); }
+
+  p { margin: 1.5mm 0; }
+
+  .advarsel {
+    border: 1.2px solid var(--rav);
+    border-left: 2.2mm solid var(--rav);
+    padding: 2.5mm 4mm;
+    margin: 3mm 0;
+  }
+  .advarsel b { display: block; font-size: 8.5pt; letter-spacing: .24em; color: var(--rav); }
+
+  .roller { display: grid; grid-template-columns: 1fr 1fr; gap: 4mm; }
+  .rolle { border: 1px solid var(--ink); padding: 3mm 4mm; }
+  .rolle .navn { font-size: 9pt; letter-spacing: .18em; text-transform: uppercase; font-weight: 800; color: var(--groen); }
+  .rolle p { margin: 1mm 0 0; font-size: 10.5pt; }
+
+  figure { margin: 2mm 0 0; border: 1px solid var(--ink); padding: 2mm; }
+  figcaption { display: flex; justify-content: space-between; font-size: 8pt; letter-spacing: .2em; text-transform: uppercase; color: var(--svag); padding: 0 1mm 1.5mm; }
+  svg { width: 100%; height: auto; display: block; }
+
+  .g { color: var(--groen); font-weight: 800; }
+  .o { color: var(--orange); font-weight: 800; }
+
+  /* ---- bagside: trin ---- */
+  ol.trin { list-style: none; padding: 0; margin: 0; counter-reset: t; }
+  ol.trin li {
+    counter-increment: t;
+    display: grid;
+    grid-template-columns: 12mm 1fr;
+    gap: 3mm;
+    padding: 2.6mm 0;
+    border-top: 1px solid var(--haar);
+    font-size: 12pt;
+  }
+  ol.trin li:last-child { border-bottom: 1px solid var(--haar); }
+  ol.trin li::before {
+    content: counter(t, decimal-leading-zero);
+    font-weight: 800;
+    font-size: 14pt;
+    color: var(--rav);
+    letter-spacing: .06em;
+  }
+
+  .tal { font-weight: 800; letter-spacing: .06em; }
+
+  /* ---- skemaer til at udfylde ---- */
+  table { width: 100%; border-collapse: collapse; font-size: 10pt; }
+  th, td { border: 1px solid var(--ink); padding: 2.2mm 2mm; text-align: left; }
+  th { font-size: 8pt; letter-spacing: .14em; text-transform: uppercase; background: #eceeec; }
+  td.k { width: 14mm; text-align: center; }
+  tr.hoej td { height: 10mm; }
+
+  .kode {
+    border: 1.5px dashed var(--ink);
+    padding: 3mm 4mm;
+    height: 70mm;
+    margin-top: 6mm;
+  }
+  .kode b { font-size: 8.5pt; letter-spacing: .22em; text-transform: uppercase; }
+  .kode span { color: var(--svag); font-size: 9pt; }
+
+  .fod {
+    margin-top: auto;
+    padding-top: 3mm;
+    border-top: 1px solid var(--haar);
+    display: flex;
+    justify-content: space-between;
+    font-size: 7.5pt;
+    letter-spacing: .22em;
+    text-transform: uppercase;
+    color: var(--svag);
+  }
+</style>
+</head>
+<body>
+
+<!-- ============================================================ FORSIDE -->
+<section class="side">
+
+  <div class="hoved">
+    <span>VASE · <b>Feltmanual</b></span>
+    <span>Dok. S-04 · Signal · Forside</span>
+  </div>
+
+  <div class="titel">
+    <div class="stempel">KUN FOR<br />VASE-PERSONEL</div>
+    <h1>SIGNAL&shy;HÅNDTERING</h1>
+    <p class="under">Manuel opfangning · reservemetode</p>
+  </div>
+
+  <div class="rune" aria-hidden="true">ᛟ ᚦ ᛉ ᛜ ᛞ ᛟ</div>
+
+  <p>
+    Gammel, manuel måde at opfange signaler på. Bruges, når den automatiske
+    signalopfangning ikke virker.
+  </p>
+
+  <div class="advarsel">
+    <b>ADVARSEL</b>
+    Metoden er <strong>upålidelig</strong>. Mandskabet bevæger signalpinde rundt
+    og fanger signalerne ét ad gangen.
+  </div>
+
+  <h2>Organisering</h2>
+  <div class="roller">
+    <div class="rolle">
+      <div class="navn">Kommandocentral</div>
+      <p>Sidder ved radaren og melder ud, <strong>hvor mandskabet skal stå</strong>.</p>
+    </div>
+    <div class="rolle">
+      <div class="navn">Signalmandskab</div>
+      <p><strong>Fritløbende.</strong> Går til stedet, sætter signalpinden og melder tilbage.</p>
+    </div>
+  </div>
+
+  <h2>Overblik</h2>
+  <figure>
+    <figcaption><span>Radar · sektor Ravningbroen</span><span>Fig. 1</span></figcaption>
+    <svg viewBox="0 0 720 360" role="img" aria-labelledby="t d" xmlns="http://www.w3.org/2000/svg">
+      <title id="t">Signaltårne og forbindelse</title>
+      <desc id="d">Fire signaltårne rundt om centrum. Tre er grønne og aktive, ét er orange og mangler. Når alle fire er grønne, er der forbindelse.</desc>
+      <style>
+        .ramme{fill:#fff;stroke:#151815;stroke-width:1.2}
+        .ring{fill:none;stroke:#9aa39a;stroke-width:1;stroke-dasharray:3 5}
+        .kryds{stroke:#cfd4cf;stroke-width:1}
+        .t{fill:#151815;font:12.5px ui-monospace,Consolas,monospace;letter-spacing:.08em}
+        .f{font-weight:700}
+        .tg{fill:#0d6b2a} .to{fill:#b35a00}
+        .lg{stroke:#0d6b2a;stroke-width:2;stroke-dasharray:7 6;fill:none}
+        .lo{stroke:#b35a00;stroke-width:2;stroke-dasharray:7 6;fill:none}
+        .box{fill:#fff;stroke:#151815;stroke-width:1.2}
+      </style>
+
+      <rect class="ramme" x="14" y="14" width="452" height="332"/>
+      <line class="kryds" x1="240" y1="14" x2="240" y2="346"/>
+      <line class="kryds" x1="14" y1="180" x2="466" y2="180"/>
+      <circle class="ring" cx="240" cy="180" r="70"/>
+      <circle class="ring" cx="240" cy="180" r="130"/>
+
+      <path class="lg" d="M240 180 L340 90"/>
+      <path class="lg" d="M240 180 L350 250"/>
+      <path class="lg" d="M240 180 L130 270"/>
+      <path class="lo" d="M240 180 L120 85"/>
+
+      <rect x="231" y="171" width="18" height="18" fill="#151815"/>
+      <text class="t f" x="262" y="196">CENTRUM</text>
+
+      <circle class="tg" cx="340" cy="90" r="10"/>
+      <text class="t f" x="356" y="94">TÅRN 1</text>
+      <circle class="tg" cx="350" cy="250" r="10"/>
+      <text class="t f" x="366" y="254">TÅRN 2</text>
+      <circle class="tg" cx="130" cy="270" r="10"/>
+      <text class="t f" x="148" y="290">TÅRN 3</text>
+      <circle class="to" cx="120" cy="85" r="10"/>
+      <text class="t f" x="138" y="70">TÅRN 4</text>
+
+      <circle class="to" cx="494" cy="34" r="7"/>
+      <text class="t" x="508" y="38">orange = ikke sat</text>
+      <circle class="tg" cx="494" cy="62" r="7"/>
+      <text class="t" x="508" y="66">grøn = aktiv</text>
+
+      <rect class="box" x="480" y="100" width="226" height="86"/>
+      <text class="t" x="494" y="124">SIGNALFORBINDELSE</text>
+      <text class="t f" x="494" y="156" style="font-size:26px;fill:#b35a00">3 / 4</text>
+      <text class="t" x="494" y="176" style="fill:#b35a00">IKKE FORBUNDET</text>
+
+      <path d="M593 190 V240" stroke="#151815" stroke-width="1.5" fill="none"/>
+      <path d="M587 232 L593 244 L599 232" stroke="#151815" stroke-width="1.5" fill="none"/>
+      <text class="t" x="606" y="222">alle grønne</text>
+
+      <rect x="480" y="250" width="226" height="86" fill="#fff" stroke="#0d6b2a" stroke-width="2.2"/>
+      <text class="t" x="494" y="274">SIGNALFORBINDELSE</text>
+      <text class="t f" x="494" y="306" style="font-size:26px;fill:#0d6b2a">4 / 4</text>
+      <text class="t f" x="494" y="326" style="fill:#0d6b2a">FORBUNDET</text>
+    </svg>
+  </figure>
+
+  <div class="fod">
+    <span>VASE · Intern</span>
+    <span>Vend arket →</span>
+  </div>
+</section>
+
+<!-- ============================================================ BAGSIDE -->
+<section class="side">
+
+  <div class="hoved">
+    <span>VASE · <b>Feltmanual</b></span>
+    <span>Dok. S-04 · Signal · Bagside</span>
+  </div>
+
+  <h2>Sådan gør I</h2>
+  <ol class="trin">
+    <li><div>Radaren viser et antal <strong>signaltårne</strong> med afstand og pejling. De er <span class="o">orange</span>.</div></li>
+    <li><div>Kommandocentralen melder til signalmandskabet, hvilket tårn de skal til.</div></li>
+    <li><div>Mandskabet går til stedet og <strong>sætter signalpinden</strong>.</div></li>
+    <li><div>De deler deres lokation med <span class="tal">[telefonnummer]</span>.</div></li>
+    <li><div>Er det sat rigtigt, bliver tårnet <span class="g">grønt</span>.</div></li>
+    <li><div>Er <strong>alle tårne grønne</strong>, er der forbindelse.</div></li>
+  </ol>
+
+  <div class="advarsel">
+    <b>KODE</b>
+    Vises der en kode på skærmen, står den kun i <strong>10 sekunder</strong>.
+    Skriv den af med det samme.
+  </div>
+
+  <div class="rune" aria-hidden="true">ᛟ ᚦ ᛉ ᛜ ᛞ ᛟ</div>
+
+  <div class="fod">
+    <span>VASE · Intern · Må ikke efterlades uden opsyn</span>
+    <span>S-04</span>
+  </div>
+</section>
+
+</body>
+</html>

@@ -581,3 +581,100 @@ body {
   letter-spacing: 0.02em;
   line-height: 1.3;
 }
+
+/* ---------------------------------------------------------------- lydklip */
+
+.lydliste {
+  display: grid;
+  gap: 0.4rem;
+  margin-top: 0.8rem;
+}
+
+.lydraekke {
+  display: flex;
+  gap: 0.6rem;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 0.86rem;
+  font-variant-numeric: tabular-nums;
+}
+
+.lydraekke__tekst {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.lydraekke__knap {
+  width: auto;
+  flex: none;
+}
+
+#lydpanel .tast {
+  margin-top: 0.5rem;
+}
+
+/* ---------------------------------------------------------------- udvidelsespakke */
+
+.signal {
+  margin-top: var(--luft);
+}
+
+.signal[hidden] {
+  display: none;
+}
+
+.signal__post {
+  padding: 0.4rem 0 0.7rem;
+  border-top: 1px solid var(--kant);
+}
+
+.signal__post[data-status='AKTIV'] {
+  border-left: 3px solid var(--armeret);
+  padding-left: 0.6rem;
+}
+
+.signal__post[data-status='GODKENDT'],
+.signal__post[data-status='LUKKET'] {
+  border-left: 3px solid var(--rolig);
+  padding-left: 0.6rem;
+}
+
+.signal__knapper {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 0.4rem;
+  margin-top: 0.4rem;
+}
+
+.signal__knap {
+  position: relative;
+  overflow: hidden;
+}
+
+/* Langt tryk: fremdriften tegnes som en streg i bunden af knappen. */
+.signal__knap::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  height: 3px;
+  width: calc(var(--fremdrift, 0) * 100%);
+  background: var(--armeret);
+}
+
+.signal__formular {
+  margin-top: var(--luft);
+  padding-top: var(--luft);
+  border-top: 1px solid var(--kant-skarp);
+}
+
+.signal__import {
+  margin-top: var(--luft);
+}
+
+.signal__import textarea {
+  width: 100%;
+  margin: 0.5rem 0;
+  font-family: var(--skrift);
+}

@@ -3,7 +3,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>VASE Natvagt — Station Vork</title>
+    <title>Radar</title>
   </head>
   <body>
     <header class="hoved" id="hoved"></header>
@@ -12,6 +12,8 @@
       <div id="kort"></div>
       <canvas id="sweep"></canvas>
       <div class="kortskala" id="kortskala"></div>
+      <section class="indkommende" id="indkommende" aria-live="polite" hidden></section>
+      <section class="taarnstatus" id="taarnstatus" aria-live="polite" hidden></section>
     </div>
 
     <div class="instrumenter">
@@ -22,6 +24,13 @@
     </div>
 
     <div class="log" id="log"></div>
+
+    <div class="signalfejl" id="signalfejl" role="alert" hidden>
+      <span class="signalfejl__titel">AUTOMATISK SIGNALOPFANGNING UDE</span>
+      <span class="signalfejl__tekst">Brug manuel signalhåndtering</span>
+    </div>
+
+    <section class="signalkode" id="signalkode" aria-live="assertive" hidden></section>
 
     <div class="alarmramme" aria-hidden="true"></div>
     <div class="crt" aria-hidden="true"></div>

@@ -4,9 +4,9 @@
   "seed": 20260715,
   "_note": "Generalproeve. Samme indstillinger som nat.json. Koeres tidskomprimeret, se scripts/generalprove.mjs.",
   "base": {
-    "lat": 55.65831,
-    "lon": 9.359385,
-    "label": "STATION VORK",
+    "lat": 55.674928,
+    "lon": 9.347811,
+    "label": "RAVNINGBROEN",
     "verificeret": false
   },
   "kort": {

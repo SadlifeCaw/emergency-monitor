@@ -13,9 +13,16 @@
 export type {
   AlarmVisning,
   AnomaliVisning,
+  LydklipVisning,
   Sensorhistorik,
   Skaermbillede,
 } from '../../server/src/drift/skaermbillede.js';
+
+export type {
+  KodeVisning,
+  TaarnVisning,
+  UdvidelseVisning,
+} from '../../server/src/udvidelse/udvidelse.js';
 
 export type { Loglinje, Logniveau, Sensoraflaesning } from '../../server/src/motor/telemetri.js';
 

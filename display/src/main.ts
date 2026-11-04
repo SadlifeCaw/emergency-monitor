@@ -15,12 +15,16 @@ import './style/tokens.css';
 import './style/skaerm.css';
 import './style/kort.css';
 import './style/ravage.css';
+import './style/signal.css';
 
 import { lavGlitch } from './glitch.js';
 import { lavMaalingsglitch, maalingsglitchAktiv } from './maalingsglitch.js';
 import { lavKort } from './kort/kort.js';
 import type { Kort } from './kort/kort.js';
 import { lavLyd } from './lyd.js';
+import { lavLydklip } from './lydklip.js';
+import { OPBYGNING_SEK, medFuldDekryptering } from './lydklipregler.js';
+import { lavIndkommendepanel } from './paneler/indkommende.js';
 import { afspilbare, lydbeslutning, tomLydtilstand } from './lydbeslutning.js';
 import type { Lydtilstand } from './lydbeslutning.js';
 import { lavAlarmpanel } from './paneler/alarm.js';
@@ -29,6 +33,7 @@ import { lavHovedpanel, visForbindelse } from './paneler/hoved.js';
 import { lavKortskala } from './paneler/kortskala.js';
 import { lavKurvepanel } from './paneler/kurver.js';
 import { lavLogpanel } from './paneler/log.js';
+import { lavSignalpanel } from './paneler/signal.js';
 import { lavStatuspanel } from './paneler/status.js';
 import type { Panel } from './paneler/panel.js';
 import type { Skaermbillede } from './kontrakt.js';
@@ -65,6 +70,16 @@ const glitch = lavGlitch(document.body);
 const maalingsglitch = lavMaalingsglitch(
   Array.from(document.querySelectorAll<HTMLElement>('#kurver .kurve, #dekryptering')),
 );
+let sidsteSkaermbillede: Skaermbillede | null = null;
+/** Klippet vi sidst startede opbygningens lyd for. */
+let opbygningFor: string | null = null;
+// Naar klippet slutter, skal dekrypteringen falde tilbage med det samme og ikke
+// vente paa naeste skaermbillede.
+const lydklip = lavLydklip(() => {
+  if (sidsteSkaermbillede) vis(sidsteSkaermbillede);
+});
+const indkommende = lavIndkommendepanel(felt('indkommende'), () => lydklip.status());
+const signal = lavSignalpanel(felt('signalkode'), felt('taarnstatus'));
 const armerknap = felt('armer') as HTMLButtonElement;
 
 let kort: Kort | null = null;
@@ -72,6 +87,10 @@ let harBasiskort = true;
 let ventetid = GENFORBIND_START_MS;
 let lydtilstand: Lydtilstand = tomLydtilstand();
 let lydVarFra = false;
+/** Koder, skaermen allerede har givet lyd for. */
+let signalerLydFor = '';
+/** Var der forbindelse sidste gang? Bruges til lyden, naar den mistes. */
+let varForbundet = false;
 
 /**
  * Armering af lyden.
@@ -148,6 +167,50 @@ const opdaterLyd = (s: Skaermbillede): void => {
   }
 };
 
+/** Ét blip, naar en kode bliver vist. */
+const opdaterSignallyd = (s: Skaermbillede): void => {
+  const noegle = s.udvidelse?.kode ? `k:${s.udvidelse.kode.id}:${s.udvidelse.kode.billede}` : '';
+  const nyt = noegle !== '' && noegle !== signalerLydFor && !s.ravage.lydFra;
+  signalerLydFor = noegle;
+  if (nyt) lyd.blip();
+};
+
+/** Hvor hvert taarn stod sidst, og om det var aktivt - til respawn og aktivering. */
+let forrigeTaarne = new Map<string, { sted: string; aktiv: boolean }>();
+
+/**
+ * Taarnenes lyde: "signal tabt", naar forbindelsen mistes eller et taarn
+ * respawnes - og en stigende tone, naar et taarn aktiveres.
+ *
+ * Et respawn er et taarn, der allerede stod der, men nu staar et andet sted.
+ * Taarnene der blot dukker op - eller skjules og vises igen - giver ingen lyd.
+ * Sker begge dele samtidig, lyder den kun én gang.
+ */
+const opdaterForbindelseslyd = (s: Skaermbillede): void => {
+  const taarne = s.udvidelse?.taarne ?? [];
+  const forbundet = s.udvidelse?.forbundet ?? false;
+
+  const nu = new Map(taarne.map((t) => [t.id, { sted: `${t.lat},${t.lon}`, aktiv: t.aktiv }] as const));
+  const respawnet = taarne.some((t) => {
+    const foer = forrigeTaarne.get(t.id);
+    return foer !== undefined && foer.sted !== nu.get(t.id)?.sted;
+  });
+  // Aktiveret: et taarn, der stod der foer som inaktivt, og nu er aktivt.
+  const aktiveret = taarne.some((t) => {
+    const foer = forrigeTaarne.get(t.id);
+    return foer !== undefined && !foer.aktiv && t.aktiv;
+  });
+  forrigeTaarne = nu;
+
+  const mistet = varForbundet && !forbundet && taarne.length > 0;
+  varForbundet = forbundet;
+
+  if (s.ravage.lydFra) return;
+  // Tab og respawn vinder over aktivering, hvis de sker i samme billede.
+  if (mistet || respawnet) lyd.signalTabt();
+  else if (aktiveret) lyd.taarnAktiveret();
+};
+
 const vis = (s: Skaermbillede): void => {
   // Fasen saettes paa body, saa alarmen kan overtage layoutet uden at hvert
   // panel skal kende til den.
@@ -157,14 +220,45 @@ const vis = (s: Skaermbillede): void => {
   // Instruktoerernes forstyrrelser. Sloeringen og koordinatet er ren CSS;
   // glitchen har sin egen rytme og styres derfor af et modul.
   document.body.dataset['sloeret'] = s.ravage.sloeretKort ? 'ja' : 'nej';
+  document.body.dataset['signalfejl'] = s.ravage.signalfejl ? 'ja' : 'nej';
+  felt('signalfejl').hidden = !s.ravage.signalfejl;
   glitch.saet(s.ravage.glitch);
   maalingsglitch.saet(maalingsglitchAktiv(s.ravage.maalingsfejl, s.fase));
+
+  sidsteSkaermbillede = s;
+  lydklip.opdater(s.lydklip, s.ravage.lydFra);
+  const klip = lydklip.status();
+  const klipAktivt = klip.aktiv;
+  document.body.dataset['indkommende'] = !klipAktivt
+    ? 'nej'
+    : klip.fase === 'opbygning'
+      ? 'opbygning'
+      : 'ja';
+  indkommende.opdater(klipAktivt);
+
+  // Opbygningens lyd startes én gang pr. klip - ikke ved hvert skaermbillede.
+  const klipId = klipAktivt ? (s.lydklip?.haendelseId ?? null) : null;
+  if (klipId !== null && klipId !== opbygningFor && klip.fase === 'opbygning' && !s.ravage.lydFra) {
+    lyd.opbygning(OPBYGNING_SEK * (1 - klip.opbygningAndel));
+  }
+  if (klipId !== null) opbygningFor = klipId;
+  // Er klippet vaek - fx fordi et taarn mistede forbindelsen - skal skraldet
+  // fra opbygningen ikke koere videre.
+  if (klipId === null) lyd.stopOpbygning();
 
   kort ??= lavKort(kortvaert, sweepvaert, { harBasiskort });
   kort.opdater(s);
   skala.opdater(kort.meterPrPixel());
 
-  for (const panel of paneler) panel.opdater(s);
+  // Mens klippet spiller, staar dekrypteringen paa 100 %.
+  const tegnet = medFuldDekryptering(
+    s,
+    !klipAktivt ? null : klip.fase === 'opbygning' ? klip.opbygningAndel : 1,
+  );
+  for (const panel of paneler) panel.opdater(tegnet);
+  signal.opdater(s);
+  opdaterSignallyd(s);
+  opdaterForbindelseslyd(s);
   opdaterLyd(s);
 };
 

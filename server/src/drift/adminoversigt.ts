@@ -9,6 +9,7 @@
 
 import { afstandM, formaterDdm, pejlingGrader, sektorFor } from '../motor/geo.js';
 import type { Haendelse, Scenarie, Tilstand } from '../motor/typer.js';
+import type { Udvidelsesoversigt } from '../udvidelse/udvidelse.js';
 
 export type Haendelsesstatus = 'planlagt' | 'fyret' | 'oploest';
 
@@ -55,6 +56,8 @@ export interface Adminoversigt {
   readonly ravage: Tilstand['ravage'];
   /** Naeste haendelse der endnu ikke er fyret, eller null. */
   readonly naeste: HaendelseIOversigt | null;
+  /** Udvidelsespakken: signaltaarne. Null hvis kalderen ikke giver den med. */
+  readonly udvidelse: Udvidelsesoversigt | null;
 }
 
 const statusFor = (tilstand: Tilstand, id: string): Haendelsesstatus => {
@@ -86,6 +89,7 @@ export const bygAdminoversigt = (
   scenarie: Scenarie,
   tilstand: Tilstand,
   nu: number,
+  udvidelse: Udvidelsesoversigt | null = null,
 ): Adminoversigt => {
   const haendelser = scenarie.haendelser.map((h): HaendelseIOversigt => {
     const status = statusFor(tilstand, h.id);
@@ -114,5 +118,6 @@ export const bygAdminoversigt = (
     aktivAlarm: tilstand.aktivAlarm,
     ravage: tilstand.ravage,
     naeste: haendelser.find((h) => h.kanFyres) ?? null,
+    udvidelse,
   };
 };

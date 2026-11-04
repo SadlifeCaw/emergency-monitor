@@ -1,0 +1,271 @@
+/*
+ * Udvidelsespakken: signalalarmer.
+ *
+ * Ravfarvet som den indkommende transmission: ubekræftet, ikke alarm. Kortet
+ * ligger nederst til venstre, så det ikke kolliderer med transmissionen, som
+ * sidder øverst til venstre.
+ */
+
+/* ---------------------------------------------------------------- kortmærkater */
+
+.kort-signal-prik {
+  animation: signal-puls 1.2s ease-in-out infinite;
+}
+
+.kort-signal-ring {
+  animation: signal-ring 2.4s ease-out infinite;
+}
+
+@keyframes signal-puls {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.35;
+  }
+}
+
+@keyframes signal-ring {
+  0% {
+    stroke-opacity: 0.9;
+  }
+  100% {
+    stroke-opacity: 0.15;
+  }
+}
+
+/* ---------------------------------------------------------------- kode */
+
+.signalkode {
+  position: fixed;
+  inset: 0;
+  z-index: 2000;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--luft-3);
+  background: rgb(8 10 8 / 94%);
+  text-align: center;
+}
+
+.signalkode[hidden] {
+  display: none;
+}
+
+.signalkode__hoved {
+  color: var(--fosfor);
+  letter-spacing: var(--spor-vid);
+  font-size: 1.4rem;
+}
+
+.signalkode__titel {
+  color: var(--papir);
+  letter-spacing: var(--spor-normal);
+}
+
+.signalkode__billede {
+  /* Koderne er brede linjetegninger med gennemsigtig baggrund: hvid flade, glat skalering. */
+  max-width: 90vw;
+  max-height: 60vh;
+  padding: 1.2rem 1.6rem;
+  background: #fff;
+  border: 1px solid var(--hårlinje);
+  image-rendering: auto;
+}
+
+.signalkode__tid {
+  color: var(--rav);
+  font-variant-numeric: tabular-nums;
+  letter-spacing: var(--spor-vid);
+}
+
+/* ---------------------------------------------------------------- signalfejl */
+
+/*
+ * Forstyrrelse: automatisk signalopfangning er ude. Banneret staar fast, og
+ * instrumenterne gaar i staa - kun manuel signalhaandtering er tilbage.
+ */
+.signalfejl {
+  /* Fast i vinduets nederste hoejre hjoerne - ikke i kortet. */
+  position: fixed;
+  right: var(--luft-3);
+  bottom: var(--luft-3);
+  z-index: 1900;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  padding: var(--luft-1) var(--luft-3);
+  border: 1px solid var(--signal);
+  background: rgb(10 12 10 / 92%);
+  color: var(--signal);
+  letter-spacing: var(--spor-vid);
+  text-align: center;
+  pointer-events: none;
+}
+
+.signalfejl[hidden] {
+  display: none;
+}
+
+.signalfejl__titel {
+  font-size: 0.9rem;
+  animation: signal-puls 1.4s steps(2, jump-none) infinite;
+}
+
+.signalfejl__tekst {
+  font-size: 0.75rem;
+  color: var(--papir-dæmpet);
+}
+
+body[data-signalfejl='ja'] #sweep {
+  display: none;
+}
+
+body[data-signalfejl='ja'] #kurver,
+body[data-signalfejl='ja'] #dekryptering {
+  opacity: 0.22;
+  filter: grayscale(1);
+}
+
+/* ---------------------------------------------------------------- signaltaarne */
+
+.kort-maerkat--taarn {
+  color: #ff8a00;
+  font-size: 0.85rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  transform: translate(20px, -50%);
+  padding: 2px 6px;
+  background: rgb(10 12 10 / 78%);
+  border: 1px solid rgb(255 138 0 / 55%);
+}
+
+.kort-maerkat--taarn-aktiv {
+  color: var(--fosfor);
+  border-color: var(--fosfor-svag);
+}
+
+.kort-taarn--inaktiv {
+  animation: signal-puls 1.6s ease-in-out infinite;
+}
+
+.taarnstatus {
+  position: absolute;
+  right: var(--luft-3);
+  bottom: var(--luft-3);
+  z-index: 1100;
+  min-width: 15rem;
+  padding: var(--luft-2) var(--luft-3);
+  border: 1px solid #ff8a00;
+  background: rgb(10 12 10 / 92%);
+  color: var(--fosfor-dæmpet);
+  pointer-events: none;
+}
+
+.taarnstatus[hidden] {
+  display: none;
+}
+
+.taarnstatus[data-forbundet='ja'] {
+  border-color: var(--fosfor);
+}
+
+.taarnstatus__hoved {
+  display: flex;
+  justify-content: space-between;
+  gap: var(--luft-3);
+  letter-spacing: var(--spor-vid);
+  font-size: 0.8rem;
+  color: #ff8a00;
+}
+
+.taarnstatus[data-forbundet='ja'] .taarnstatus__hoved {
+  color: var(--fosfor);
+}
+
+.taarnstatus__raekke {
+  display: flex;
+  gap: var(--luft-2);
+  margin-top: 0.15rem;
+  font-size: 0.8rem;
+}
+
+.taarnstatus__raekke[data-aktiv='nej'] .taarnstatus__prik {
+  color: #ff8a00;
+}
+
+.taarnstatus__raekke[data-aktiv='ja'] .taarnstatus__prik {
+  color: var(--fosfor);
+}
+
+.taarnstatus__tilstand {
+  margin-top: var(--luft-1);
+  font-size: 0.75rem;
+  letter-spacing: var(--spor-vid);
+  color: var(--papir-dæmpet);
+}
+
+/* Statuspanelet under signalfejl: ravfarvet tekst, som en advarsel. */
+.status[data-signalfejl='ja'] .status__tekst {
+  color: var(--rav);
+}
+
+/* ---------------------------------------------------------------- transmission: to parter */
+
+/*
+ * Samtalen har to parter, men kun den ene kan opfanges. Den hoerbare part staar
+ * i fosfor; den anden er graa, streget og uden signal - saa forskellen er til at
+ * se paa afstand.
+ */
+.indkommende__parter {
+  margin-top: var(--luft-2);
+}
+
+.indkommende__parter[hidden] {
+  display: none;
+}
+
+.indkommende__part {
+  display: grid;
+  grid-template-columns: 1.2rem auto 1fr;
+  gap: var(--luft-1) var(--luft-2);
+  align-items: baseline;
+  padding: 0.25rem 0;
+  font-size: 0.82rem;
+  letter-spacing: var(--spor-normal);
+}
+
+.indkommende__partstatus {
+  text-align: right;
+}
+
+.indkommende__part--hoeres {
+  color: var(--fosfor);
+}
+
+.indkommende__part--tavs {
+  color: var(--fosfor-spøgelse);
+  border-top: 1px dashed var(--hårlinje);
+}
+
+.indkommende__part--tavs .indkommende__partnavn {
+  text-decoration: line-through;
+  text-decoration-thickness: 1px;
+}
+
+.indkommende__parter .indkommende__note {
+  margin-top: var(--luft-1);
+}
+
+/* Transmissionen er en genafspilning: ravfarvet stempel under kilden. */
+.indkommende__historik {
+  margin-top: var(--luft-1);
+  padding: 0.15rem 0.5rem;
+  border: 1px solid var(--rav-svag);
+  color: var(--rav);
+  font-size: 0.74rem;
+  letter-spacing: var(--spor-vid);
+  text-align: center;
+}

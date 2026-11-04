@@ -1,4 +1,23 @@
-# VASE NATVAGT — Emergency Monitor
+# VASE NATVAGT — Emergency Monitor Extended
+
+Kildekode og udgivelser: <https://github.com/SadlifeCaw/emergency-monitor>
+
+## Hent og kør (Windows)
+
+1. Hent **`Radar-<version>-windows.zip`** fra [Releases](https://github.com/SadlifeCaw/emergency-monitor/releases/latest).
+2. Pak zip-filen ud, og dobbeltklik på **`Radar.exe`**. Ingen installation.
+   (Windows siger måske "Windows har beskyttet din pc": klik *Flere oplysninger* → *Kør alligevel*.)
+3. Første gang spørger programmet om **centrum**: højreklik på stedet i Google Maps,
+   klik på tallene øverst i menuen, og indsæt dem. Kortet hentes (kræver internet, kun den ene gang).
+4. Scan **QR-koden** med instruktørens telefon (samme wifi) for at komme ind i admin.
+5. Tryk *Tillad*, hvis Windows spørger om netværksadgang, og tryk på skærmen én gang for at slå lyden til.
+
+Nyt centrum: start `Radar.exe` og skriv `N`, når den spørger. Programmet bygges med `npm run udgivelse`.
+
+
+> **Extended** = den oprindelige Emergency Monitor + udvidelsespakken med signaltårne.
+> Alarmsystemet ser ens ud, indtil pakken aktiveres i admin.
+> Se [docs/05-udvidelse.md](docs/05-udvidelse.md).
 
 Overvågningsmonitor til nataktiviteten på Seniorkursus Vork E26.
 
@@ -58,11 +77,13 @@ natten videre efter planen — kun admin-styringen holder op med at virke.
 | [docs/02-spec.md](docs/02-spec.md) | Teknisk specifikation, arkitektur, datamodel og API |
 | [docs/03-todos.md](docs/03-todos.md) | Opgavenedbrydning i faser med acceptkriterier |
 | [docs/04-skills.md](docs/04-skills.md) | Researchede agent-skills koblet til hver fase |
+| [docs/kompendium-radar.md](docs/kompendium-radar.md) | Beskrivelse af aktiviteten til kompendiet (den oprindelige radar) |
+| [docs/05-udvidelse.md](docs/05-udvidelse.md) | **Udvidelsespakken**: historie, signaltårne, koder og forløb |
 
 ## Grundfakta
 
-- **Base / kortets midtpunkt:** FDF Lejrcenter Vork, Vork Bakker 12, 7100 Vejle
-- **Koordinat:** `55.65831, 9.359385` (WGS84, slået op via OpenStreetMap Nominatim — **skal verificeres i marken**)
+- **Base / kortets midtpunkt:** Ravningbroen (Ravning Enge, Vejle) — flyttet fra FDF Lejrcenter Vork
+- **Koordinat:** `55.674928, 9.347811` (WGS84, fra Naturstyrelsens rutekort — **skal verificeres i marken**). Flyt igen med `node scripts/flyt-base.mjs <lat> <lon> [label]` og `npm run hent-kort`
 - **Drift:** offline-first på lokal PC. Skal fungere selv hvis wifi falder ud kl. 02.
 - **Målgruppe:** 15-18 år
 
@@ -199,3 +220,28 @@ start-zoom 13). Kortfilen rækker 4500 m fra basen; ønskes mere, hæv radius og
 `start.bat` skriver også **admin-linket** ud, kopierer det til udklipsholderen og gemmer det
 i `admin-link.txt` (skærmen i fuldskærm dækker vinduet). Linket indeholder tokenet og bliver ikke
 committet. Skifter netværk (fx på Vork), får du det rigtige link ved næste start.
+
+## Lydklip (indkommende transmission)
+
+Læg en lydfil (mp3, wav, ogg, m4a) i `assets/lyd/` på maskinen. I admin, panelet
+**Lydklip**, vælges fil og tidspunkt — eller **Afspil nu**. Mens klippet spiller:
+
+- afspilles lyden på skærmen,
+- står **dekrypteringen på 100 %**,
+- vises en *Indkommende transmission* over kortet, med teksten at kun udgående
+  kommunikation kan høres.
+
+Varigheden er klippets egen længde. Et klip afbrydes ved at trykke **Stop/Aflys**
+i listen. *Lyd fra* i forstyrrelserne tystner klippet, men GUI og 100 % vises
+stadig. Skærmen skal være armeret (eller Chrome startet i kiosk), som for sirenen.
+
+## Udvidelsespakken: signaltårne
+
+Admin kan slå fire (eller flere) signaltårne til. De står orange på kortet med en
+stiplet linje ud fra centrum og bliver grønne, når admin aktiverer dem. Er alle
+grønne, er der forbindelse, og talebeskeden afspilles. Tårnene er skjult, til
+admin slår dem til. Se [docs/05-udvidelse.md](docs/05-udvidelse.md).
+
+```bash
+npm run lav-koder   # pladsholder-koder i assets/koder/ (erstat med egne PNG-filer)
+```

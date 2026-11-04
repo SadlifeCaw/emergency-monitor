@@ -15,6 +15,9 @@
  *  - **Glitch.** Skaermen sætter ud en gang imellem og kommer tilbage igen.
  *  - **Maalingsforstyrrelse.** Seismik, EMF, temperatur og dekryptering glitcher
  *    sporadisk hver for sig. Skaermen holder den selv ude under en alarm.
+ *  - **Signalfejl.** Den automatiske signalopfangning er ude af drift: radaren
+ *    finder ikke selv anomalier, og instrumenterne gaar i staa. Signaler kan
+ *    kun haandteres manuelt, med signalpinde. Se docs/vase-signalsystem-guide.
  *  - **Lyd fra.** Skaermen kan ikke naa hoejttalerne: alt lyd tier, og et
  *    lyd-fra-ikon staar i hjoernet. En alarm kan kun ses, ikke hoeres.
  *
@@ -30,6 +33,7 @@ export interface Ravage {
   readonly glitch: boolean;
   readonly maalingsfejl: boolean;
   readonly lydFra: boolean;
+  readonly signalfejl: boolean;
 }
 
 export const tomRavage = (): Ravage => ({
@@ -38,6 +42,7 @@ export const tomRavage = (): Ravage => ({
   glitch: false,
   maalingsfejl: false,
   lydFra: false,
+  signalfejl: false,
 });
 
 /**
@@ -60,6 +65,7 @@ export const saetRavage = (
     glitch: aendringer.glitch ?? tilstand.ravage.glitch,
     maalingsfejl: aendringer.maalingsfejl ?? tilstand.ravage.maalingsfejl,
     lydFra: aendringer.lydFra ?? tilstand.ravage.lydFra,
+    signalfejl: aendringer.signalfejl ?? tilstand.ravage.signalfejl,
   };
 
   const uaendret = (Object.keys(ravage) as (keyof Ravage)[]).every(

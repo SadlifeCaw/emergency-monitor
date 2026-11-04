@@ -118,8 +118,8 @@ describe('alarmen', () => {
 
     const alarm = natvagt.skaermbillede().alarm;
     expect(alarm).not.toBeNull();
-    expect(alarm?.afstandM).toBe(394);
-    expect(alarm?.pejlingGrader).toBe(60);
+    expect(alarm?.afstandM).toBe(1963);
+    expect(alarm?.pejlingGrader).toBe(147);
     expect(alarm?.ddm).toBe("55°39.606'N 009°21.888'E");
     expect(alarm?.naermestePunkt).toBe('P15 TREKANTSDEPOT');
   });
@@ -174,7 +174,7 @@ describe('genoptagelse efter nedbrud', () => {
     await anden.natvagt.skridt();
 
     expect(anden.natvagt.tilstand().fase).toBe('ALARM');
-    expect(anden.natvagt.skaermbillede().alarm?.afstandM).toBe(394);
+    expect(anden.natvagt.skaermbillede().alarm?.afstandM).toBe(1963);
   });
 });
 
@@ -247,7 +247,7 @@ describe('admin-kommandoer', () => {
     await natvagt.fyrHaendelse('alarm-hoved');
 
     expect(natvagt.tilstand().fase).toBe('ALARM');
-    expect(natvagt.skaermbillede().alarm?.afstandM).toBe(394);
+    expect(natvagt.skaermbillede().alarm?.afstandM).toBe(1963);
   });
 
   test('kvitterer, saa sirenen kan tie', async () => {

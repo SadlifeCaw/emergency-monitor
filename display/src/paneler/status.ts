@@ -20,6 +20,10 @@ const ROLIG_TEKST: Record<Fase, string> = {
   AFSLUTTET: 'Vagten er slut. Sagen er overdraget til dagholdet.',
 };
 
+/** Signalfejl: den automatiske opfangning er ude. Alarmen har dog forrang. */
+const SIGNALFEJL_TEKST =
+  'Automatisk signalopfangning er ude af drift. Brug manuel signalhåndtering.';
+
 export const lavStatuspanel = (vaert: HTMLElement): Panel => {
   const hoved = el('div', 'panel__navn');
   hoved.append(el('span', 'felt', 'Status'));
@@ -32,7 +36,9 @@ export const lavStatuspanel = (vaert: HTMLElement): Panel => {
   return {
     opdater: (s) => {
       vaert.dataset['fase'] = s.fase;
-      saetTekst(tekst, ROLIG_TEKST[s.fase]);
+      const signalfejl = s.ravage.signalfejl && s.fase !== 'ALARM' && s.fase !== 'AFSLUTTET';
+      vaert.dataset['signalfejl'] = signalfejl ? 'ja' : 'nej';
+      saetTekst(tekst, signalfejl ? SIGNALFEJL_TEKST : ROLIG_TEKST[s.fase]);
 
       anomalier.replaceChildren(
         ...s.anomalier.map((a) => {

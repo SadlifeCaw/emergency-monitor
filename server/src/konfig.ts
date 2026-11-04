@@ -30,6 +30,10 @@ export interface Konfig {
   readonly hastighed: number;
   /** Virtuelt starttidspunkt. Kun relevant sammen med hastighed > 1. */
   readonly virtuelStart: number | null;
+  /** Mappen med lydklip. Mangler den, oprettes den ved opstart. */
+  readonly lydmappe?: string;
+  /** Mappen med kodebilleder (PNG) til udvidelsespakkens signaltaarne. */
+  readonly kodemappe?: string;
   /** Antal loglinjer skaermen holder i hukommelsen. Fast loft mod hukommelseslaek. */
   readonly logloft: number;
 }
@@ -108,6 +112,8 @@ export const laesKonfig = (rod: string): Konfig => {
     tilstandssti: resolve(rod, tekst('NATVAGT_TILSTAND', 'state/runtime.json')),
     hastighed,
     virtuelStart: laesVirtuelStart(),
+    lydmappe: resolve(rod, tekst('NATVAGT_LYDMAPPE', 'assets/lyd')),
+    kodemappe: resolve(rod, tekst('NATVAGT_KODEMAPPE', 'assets/koder')),
     logloft: tal('NATVAGT_LOGLOFT', STANDARD_LOGLOFT),
   };
 };

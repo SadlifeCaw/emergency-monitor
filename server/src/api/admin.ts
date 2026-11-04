@@ -15,12 +15,16 @@
  */
 
 import { createHash, timingSafeEqual } from 'node:crypto';
+import { existsSync } from 'node:fs';
+import { readdir } from 'node:fs/promises';
+import { join } from 'node:path';
 import rateLimit from '@fastify/rate-limit';
 import type { FastifyInstance, FastifyReply, FastifyRequest } from 'fastify';
 import { z } from 'zod';
 import { bygAdminoversigt } from '../drift/adminoversigt.js';
 import type { Natvagt } from '../drift/natvagt.js';
-import { ScenarieFejl } from '../motor/scenarie.js';
+import { LYDFIL, ScenarieFejl } from '../motor/scenarie.js';
+import { KODEFIL, bygOversigt } from '../udvidelse/udvidelse.js';
 import type { Konfig } from '../konfig.js';
 import type { Udsending } from '../ws/udsending.js';
 
@@ -43,6 +47,7 @@ const ravageSkema = z.object({
   glitch: z.boolean().optional(),
   maalingsfejl: z.boolean().optional(),
   lydFra: z.boolean().optional(),
+  signalfejl: z.boolean().optional(),
 });
 
 /**
@@ -66,7 +71,26 @@ interface AdminAfhaengigheder {
   readonly natvagt: Natvagt;
   readonly konfig: Konfig;
   readonly udsending: Udsending;
+  /** Mappen lydklippene ligger i. */
+  readonly lydmappe: string;
+  /** Mappen kodebillederne ligger i. */
+  readonly kodemappe: string;
 }
+
+/**
+ * Et lydklip skal findes paa disken, foer haendelsen oprettes.
+ *
+ * Bedre en fejl paa telefonen kl. 19 end et klip, der ikke lyder kl. 02.
+ */
+const kravLydfil = (lydmappe: string, fil: unknown): void => {
+  if (typeof fil !== 'string') return;
+  if (LYDFIL.test(fil) && !existsSync(join(lydmappe, fil))) {
+    throw new ScenarieFejl(`Lydfilen "${fil}" findes ikke i ${lydmappe}`);
+  }
+};
+
+const erObjekt = (v: unknown): v is Record<string, unknown> =>
+  typeof v === 'object' && v !== null && !Array.isArray(v);
 
 /** Oversaetter en fejl til noget, der kan staa paa en telefonskaerm. */
 const svarPaaFejl = (app: FastifyInstance, reply: FastifyReply, fejl: unknown): FastifyReply => {
@@ -80,9 +104,20 @@ const svarPaaFejl = (app: FastifyInstance, reply: FastifyReply, fejl: unknown): 
 /** Ruter der kun ser paa noget. De aendrer intet og gaar ikke gennem kommandokoeen. */
 const registrerLaeseruter = (
   admin: FastifyInstance,
-  { natvagt, konfig, udsending }: AdminAfhaengigheder,
+  { natvagt, konfig, udsending, lydmappe }: AdminAfhaengigheder,
   oversigt: () => unknown,
 ): void => {
+  /** Lydfilerne man kan vaelge imellem. */
+  admin.get('/api/admin/lydfiler', async () => {
+    let navne: string[] = [];
+    try {
+      navne = await readdir(lydmappe);
+    } catch {
+      // Mappen findes ikke endnu - listen er bare tom.
+    }
+    return { mappe: lydmappe, filer: navne.filter((n) => LYDFIL.test(n)).sort() };
+  });
+
   admin.get('/api/admin/oversigt', () => oversigt());
 
   admin.get('/api/admin/helbred', () => ({
@@ -98,15 +133,26 @@ const registrerLaeseruter = (
 type Udfoer = (reply: FastifyReply, handling: () => Promise<void>) => Promise<unknown>;
 
 /** Ruter der retter i scenariet: opret, ret og aflys alarmer. */
-const registrerScenarieruter = (admin: FastifyInstance, natvagt: Natvagt, udfoer: Udfoer): void => {
+const registrerScenarieruter = (
+  admin: FastifyInstance,
+  natvagt: Natvagt,
+  udfoer: Udfoer,
+  lydmappe: string,
+): void => {
   admin.post('/api/admin/haendelse', (req, reply) =>
-    udfoer(reply, () => natvagt.opretHaendelse(req.body)),
+    udfoer(reply, async () => {
+      if (erObjekt(req.body) && req.body['type'] === 'LYD') kravLydfil(lydmappe, req.body['fil']);
+      await natvagt.opretHaendelse(req.body);
+    }),
   );
 
   admin.patch('/api/admin/haendelse/:id', (req, reply) => {
     const { id } = idSkema.parse(req.params);
     const aendringer = aendringSkema.parse(req.body ?? {});
-    return udfoer(reply, () => natvagt.retHaendelsen(id, aendringer));
+    return udfoer(reply, async () => {
+      kravLydfil(lydmappe, aendringer['fil']);
+      await natvagt.retHaendelsen(id, aendringer);
+    });
   });
 
   admin.delete('/api/admin/haendelse/:id', (req, reply) => {
@@ -153,6 +199,90 @@ const registrerStyreruter = (admin: FastifyInstance, natvagt: Natvagt, udfoer: U
 };
 
 /**
+ * Udvidelsespakken: signaltaarne.
+ *
+ * Alle rute-svar er det opdaterede admin-overblik, ligesom resten af fladen.
+ */
+const registrerUdvidelsesruter = (
+  admin: FastifyInstance,
+  natvagt: Natvagt,
+  udfoer: Udfoer,
+  kodemappe: string,
+  lydmappe: string,
+): void => {
+  const pakkeSkema = z.object({
+    aktiv: z.boolean().optional(),
+    telefon: z.string().max(20).optional(),
+    taarnLyd: z.string().max(200).nullable().optional(),
+    taarnAktiv: z.boolean().optional(),
+  });
+
+  /** Kodebillederne man kan vaelge imellem. */
+  admin.get('/api/admin/koder', async () => {
+    let navne: string[] = [];
+    try {
+      navne = await readdir(kodemappe);
+    } catch {
+      // Mappen findes ikke endnu - listen er bare tom.
+    }
+    return { mappe: kodemappe, filer: navne.filter((n) => KODEFIL.test(n)).sort() };
+  });
+
+  /** Kodebilledet skal findes paa disken, foer alarmen gemmes. */
+  const kravKodefil = (kode: unknown): void => {
+    if (typeof kode === 'string' && KODEFIL.test(kode) && !existsSync(join(kodemappe, kode))) {
+      throw new ScenarieFejl(`Kodebilledet "${kode}" findes ikke i ${kodemappe}`);
+    }
+  };
+
+  admin.post('/api/admin/udvidelse/pakke', (req, reply) => {
+    const aendring = pakkeSkema.parse(req.body ?? {});
+    return udfoer(reply, async () => {
+      kravLydfil(lydmappe, aendring.taarnLyd);
+      await natvagt.saetUdvidelsespakke(aendring);
+    });
+  });
+
+  // --- signaltaarne ---
+  admin.post('/api/admin/udvidelse/lyd/nulstil', (_req, reply) =>
+    udfoer(reply, () => natvagt.nulstilLyd()),
+  );
+
+  admin.post('/api/admin/udvidelse/taarn', (req, reply) =>
+    udfoer(reply, async () => {
+      if (erObjekt(req.body)) kravKodefil(req.body['kode']);
+      await natvagt.gemTaarn(req.body);
+    }),
+  );
+
+  admin.delete('/api/admin/udvidelse/taarn/:id', (req, reply) => {
+    const { id } = idSkema.parse(req.params);
+    return udfoer(reply, () => natvagt.sletTaarn(id));
+  });
+
+  admin.post('/api/admin/udvidelse/taarn/:id/respawn', (req, reply) => {
+    const { id } = idSkema.parse(req.params);
+    return udfoer(reply, () => natvagt.respawnTaarn(id));
+  });
+
+  admin.post('/api/admin/udvidelse/taarn/:id/aktiver', (req, reply) => {
+    const { id } = idSkema.parse(req.params);
+    return udfoer(reply, () => natvagt.aktiverTaarn(id));
+  });
+
+  admin.post('/api/admin/udvidelse/taarn/:id/deaktiver', (req, reply) => {
+    const { id } = idSkema.parse(req.params);
+    return udfoer(reply, () => natvagt.deaktiverTaarn(id));
+  });
+
+  admin.post('/api/admin/udvidelse/taarn/:id/kode', (req, reply) => {
+    const { id } = idSkema.parse(req.params);
+    return udfoer(reply, () => natvagt.visTaarnKode(id));
+  });
+
+};
+
+/**
  * Spaerringerne foran alle admin-ruter: rate limit og token.
  *
  * Rate limitten er ikke mod normal brug - den er mod en telefon i en lomme
@@ -179,7 +309,7 @@ const beskyt = async (admin: FastifyInstance, konfig: Konfig): Promise<void> => 
 
 export const registrerAdminRuter = async (
   app: FastifyInstance,
-  { natvagt, konfig, udsending }: AdminAfhaengigheder,
+  { natvagt, konfig, udsending, lydmappe, kodemappe }: AdminAfhaengigheder,
 ): Promise<void> => {
   await app.register(async (admin) => {
     await beskyt(admin, konfig);
@@ -194,16 +324,20 @@ export const registrerAdminRuter = async (
       return reply.send(oversigt());
     };
 
-    const oversigt = () =>
-      bygAdminoversigt(
+    const oversigt = () => {
+      const nu = Date.parse(natvagt.skaermbillede().serverKl);
+      return bygAdminoversigt(
         natvagt.scenarie(),
         natvagt.tilstand(),
-        Date.parse(natvagt.skaermbillede().serverKl),
+        nu,
+        bygOversigt(natvagt.udvidelse(), natvagt.scenarie(), nu),
       );
+    };
 
-    registrerLaeseruter(admin, { natvagt, konfig, udsending }, oversigt);
+    registrerLaeseruter(admin, { natvagt, konfig, udsending, lydmappe, kodemappe }, oversigt);
 
-    registrerScenarieruter(admin, natvagt, udfoer);
+    registrerScenarieruter(admin, natvagt, udfoer, lydmappe);
     registrerStyreruter(admin, natvagt, udfoer);
+    registrerUdvidelsesruter(admin, natvagt, udfoer, kodemappe, lydmappe);
   });
 };

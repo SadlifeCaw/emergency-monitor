@@ -311,6 +311,49 @@ Kan køre parallelt med fase 3-7, men kræver fase 0.
 
 ---
 
+## Fase 10 — Let at køre for alle (Radar som færdigt program)
+
+Mål: en kreds uden programmerere skal kunne hente programmet, dobbeltklikke og
+køre aktiviteten. I dag kræver det Node.js, `npm install`, `.env` og kommandolinje.
+
+- [ ] `[K]` **Startdialog med koordinat.** Ved første start spørger programmet om
+      centrum (bredde/længde, evt. indsat direkte fra Google Maps), et navn og
+      telefonnummeret deltagerne skal dele lokation med. Gemmes, så næste start
+      går direkte i gang.
+      *Accept: nyt centrum kan angives uden at røre en fil eller en terminal.*
+- [ ] `[K]` **Én executable (`Radar.exe`).** Server, skærm og admin samlet i én fil
+      (fx Node SEA eller `pkg`/Bun-compile), så Node.js ikke skal installeres.
+      *Accept: kører på en ren Windows-PC uden Node, npm eller Git.*
+- [ ] `[K]` **Kortet hentes af programmet selv.** Efter koordinaten er angivet,
+      henter programmet kortet (én gang, kræver internet) og viser fremdrift. Ingen
+      `npm run hent-kort`, ingen `flyt-base`.
+      *Accept: nyt centrum → kort klar uden manuelle trin; virker derefter offline.*
+- [ ] `[K]` **Admin uden tekniske trin.** Admin-token genereres automatisk, og
+      programmet viser admin-linket **og en QR-kode**, som telefonen kan scanne.
+      *Accept: telefon på samme wifi er logget ind på under et minut.*
+- [ ] `[K]` **Windows Firewall.** Programmet beder om (eller guider til) tilladelsen,
+      så telefonen kan nå det. Det er den hyppigste fejl i dag.
+      *Accept: ingen kreds skal læse om firewall i en vejledning.*
+- [ ] `[P]` **Indhold uden filarbejde.** Kodebilleder og lydklip kan vælges/trækkes
+      ind i admin eller i en tydelig mappe ved siden af programmet (`koder/`, `lyd/`).
+      Standardindhold følger med, så alt kan prøves med det samme.
+- [ ] `[P]` **Tårne tilpasses i admin.** Antal, vinkelspektrum og afstand sættes ved
+      første start, ikke i en JSON-fil.
+- [ ] `[P]` **Telefonnummer i admin.** Kan ændres uden at redigere `scenarios/`.
+- [ ] `[P]` **Dobbeltklik-start.** Åbner skærmen i fuldskærm, holder PC'en vågen og
+      genstarter ved nedbrud, som `start.bat` gør i dag.
+- [ ] `[P]` **Lyd armeres automatisk** ved start (kiosk-flag), så deltagerne ikke
+      skal huske at trykke på skærmen.
+- [ ] `[K]` **Udgivelse på GitHub.** `Radar-<version>.zip` som release, med README,
+      vejledning (print for-/bagside) og eksempelindhold.
+      *Accept: link i kompendiet; en kreds kan hente og starte på 5 minutter.*
+- [ ] `[K]` **Test på en ren PC** (og gerne en anden end udviklerens). Én person, der
+      aldrig har set programmet, sætter det op alene efter beskrivelsen.
+      *Accept: opsætning færdig uden hjælp, og beskrivelsen er rettet efter de fejl, personen ramte.*
+- [ ] `[N]` Mac/Linux-udgave og en "Test"-knap i admin, der kører alle tårne igennem.
+
+---
+
 ## Kritisk sti
 
 ```
@@ -321,6 +364,7 @@ Fase 0 (koordinater + hardware)
                ├─▶ Fase 4 paneler┼─▶ Fase 5 alarm ─▶ Fase 7 robusthed ─▶ Fase 9 generalprøve
                └─▶ Fase 6 admin ─┘
 Fase 8 indhold kører parallelt fra fase 0
+Fase 10 (distribution) kommer efter fase 9 og kan startes, når Radar-aktiviteten er afprøvet
 ```
 
 **Hvis tiden bliver knap, skæres i denne rækkefølge:** CRT-effekter, dekrypteringspanel,

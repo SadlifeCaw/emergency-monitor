@@ -286,3 +286,166 @@ body[data-glitcher='ja']::after {
 body[data-lydfra='ja'] .lydfra {
   display: block;
 }
+
+/* ---------------------------------------------------------------- indkommende transmission */
+
+/*
+ * Ravfarvet: ubekræftet, ikke alarm. Ligger over kortet øverst til venstre og
+ * rører ikke layoutet, så alarmen og instrumentsøjlen er uforstyrrede.
+ */
+.indkommende {
+  position: absolute;
+  top: var(--luft-3);
+  left: var(--luft-3);
+  z-index: 1100;
+  width: min(34rem, 70%);
+  padding: var(--luft-2) var(--luft-3);
+  border: 1px solid var(--rav);
+  background: rgb(10 12 10 / 90%);
+  color: var(--fosfor-dæmpet);
+  pointer-events: none;
+}
+
+.indkommende[hidden] {
+  display: none;
+}
+
+.indkommende__hoved {
+  display: flex;
+  gap: var(--luft-2);
+  align-items: center;
+  color: var(--rav);
+  letter-spacing: var(--spor-vid);
+  font-size: 0.9rem;
+}
+
+.indkommende__lampe {
+  animation: indkommende-blink 1s steps(2, jump-none) infinite;
+}
+
+.indkommende__linje {
+  display: flex;
+  gap: var(--luft-2);
+  margin-top: var(--luft-1);
+}
+
+.indkommende__vaerdi {
+  color: var(--papir);
+}
+
+.indkommende__bolge {
+  display: block;
+  width: 100%;
+  height: 4.5rem;
+  margin: var(--luft-2) 0;
+  border-top: 1px solid var(--hårlinje-svag);
+  border-bottom: 1px solid var(--hårlinje-svag);
+}
+
+.indkommende__meter {
+  color: var(--fosfor);
+  letter-spacing: 0;
+  font-size: 0.9rem;
+}
+
+.indkommende__tid {
+  color: var(--fosfor-svag);
+  font-size: 0.8rem;
+}
+
+.indkommende__note {
+  margin: var(--luft-2) 0 0;
+  color: var(--rav);
+  font-size: 0.82rem;
+  line-height: 1.4;
+}
+
+.indkommende__dekryptering {
+  margin: var(--luft-1) 0 0;
+  color: var(--fosfor);
+  font-size: 0.8rem;
+}
+
+.indkommende__blokeret {
+  margin: var(--luft-1) 0 0;
+  color: var(--signal);
+  font-size: 0.8rem;
+}
+
+.indkommende__blokeret[hidden] {
+  display: none;
+}
+
+body[data-indkommende='ja'] #dekryptering .dekryptering__meter {
+  color: var(--fosfor);
+}
+
+@keyframes indkommende-blink {
+  50% {
+    opacity: 0.15;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .indkommende__lampe {
+    animation: none;
+  }
+}
+
+/* ---------------------------------------------------------------- opbygning */
+
+/*
+ * Foer stemmen: skærmen flimrer, kortet mørkner, og en rav kant kryber ind.
+ * --opbygning (0 til 1) sættes af panelet og vokser med lyden, så alt stiger
+ * sammen. Rører ikke layoutet, kun lysstyrke og en ganske lille rysten.
+ */
+.kortpanel::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: 1050;
+  pointer-events: none;
+  opacity: 0;
+  box-shadow: inset 0 0 calc(2rem + 9rem * var(--opbygning, 0))
+    rgb(255 176 0 / calc(0.55 * var(--opbygning, 0)));
+}
+
+body[data-indkommende='opbygning'] .kortpanel::after {
+  opacity: 1;
+}
+
+body[data-indkommende='opbygning'] .kortpanel {
+  filter: brightness(calc(1 - 0.35 * var(--opbygning, 0)));
+  animation: opbygning-flimmer 0.23s steps(2, jump-none) infinite;
+}
+
+body[data-indkommende='opbygning'] .instrumenter {
+  animation: opbygning-ryk 0.11s steps(2, jump-none) infinite;
+}
+
+.indkommende[data-fase='opbygning'] {
+  border-style: dashed;
+}
+
+.indkommende[data-fase='opbygning'] .indkommende__lampe {
+  animation-duration: 0.35s;
+}
+
+@keyframes opbygning-flimmer {
+  50% {
+    opacity: calc(1 - 0.4 * var(--opbygning, 0));
+  }
+}
+
+@keyframes opbygning-ryk {
+  50% {
+    transform: translate(calc(2px * var(--opbygning, 0)), 0);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  body[data-indkommende='opbygning'] .kortpanel,
+  body[data-indkommende='opbygning'] .instrumenter {
+    animation: none;
+  }
+}

@@ -19,6 +19,7 @@ describe('tomRavage', () => {
       glitch: false,
       maalingsfejl: false,
       lydFra: false,
+      signalfejl: false,
     });
   });
 });
@@ -80,6 +81,7 @@ describe('maalingsfejl', () => {
       glitch: false,
       maalingsfejl: true,
       lydFra: false,
+      signalfejl: false,
     });
     expect(r.udgaaende).toHaveLength(1);
   });
@@ -92,5 +94,15 @@ describe('lydFra', () => {
     const paa = saetRavage(rolig, { lydFra: true }, T0).tilstand;
     expect(paa.ravage).toMatchObject({ lydFra: true, glitch: false, maalingsfejl: false });
     expect(saetRavage(paa, { lydFra: false }, T0).tilstand.ravage.lydFra).toBe(false);
+  });
+});
+
+describe('signalfejl', () => {
+  test('slaas til og fra uden at roere de oevrige', () => {
+    const t = bygTilstand();
+    const paa = saetRavage(t, { signalfejl: true }, T0).tilstand;
+    expect(paa.ravage.signalfejl).toBe(true);
+    expect(paa.ravage.glitch).toBe(false);
+    expect(saetRavage(paa, { signalfejl: false }, T0).tilstand.ravage.signalfejl).toBe(false);
   });
 });

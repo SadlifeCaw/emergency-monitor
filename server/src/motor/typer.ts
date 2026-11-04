@@ -5,7 +5,7 @@
  * saa hele natten kan afspilles deterministisk i en test.
  */
 
-export type HaendelseType = 'ANOMALI' | 'DEKRYPTERING' | 'MELDING' | 'ALARM' | 'AFSLUT';
+export type HaendelseType = 'ANOMALI' | 'DEKRYPTERING' | 'MELDING' | 'ALARM' | 'AFSLUT' | 'LYD';
 
 export type Fase = 'ROLIG' | 'OPTRAPNING' | 'ALARM' | 'AFSLUTTET';
 
@@ -87,7 +87,21 @@ export interface Afslut extends HaendelseFaelles {
   readonly tekst: string;
 }
 
-export type Haendelse = Anomali | Dekryptering | Melding | Alarm | Afslut;
+/**
+ * Et lydklip der spilles paa skaermen.
+ *
+ * Klippet ligger som fil paa maskinen (se konfig.lydmappe); haendelsen siger
+ * kun hvilken fil og hvornaar. Mens klippet spiller, staar dekrypteringen paa
+ * 100 % og skaermen viser en indkommende transmission - det er skaermen, der
+ * kender klippets laengde, saa varigheden er altid praecis klippets egen.
+ */
+export interface Lydtransmission extends HaendelseFaelles {
+  readonly type: 'LYD';
+  /** Filnavn i lydmappen. Aldrig en sti. */
+  readonly fil: string;
+}
+
+export type Haendelse = Anomali | Dekryptering | Melding | Alarm | Afslut | Lydtransmission;
 
 export interface Scenarie {
   readonly version: 1;

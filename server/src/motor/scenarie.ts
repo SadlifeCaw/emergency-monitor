@@ -72,6 +72,22 @@ const afslutSkema = z.object({
 }).strict();
 
 /**
+ * Filnavn i lydmappen: ingen stier, kun kendte lydendelser.
+ *
+ * Reglen er den, der holder `../../noget` ude af URL'en skaermen henter fra.
+ */
+export const LYDFIL = /^[^\\/:*?"<>|]+\.(mp3|wav|ogg|oga|opus|m4a|aac|flac|webm)$/i;
+
+const lydSkema = z.object({
+  ...faelles,
+  type: z.literal('LYD'),
+  fil: z
+    .string()
+    .regex(LYDFIL, 'skal vaere et filnavn med lydendelse (mp3, wav, ogg, m4a ...) uden sti')
+    .refine((f) => !f.startsWith('.'), 'maa ikke begynde med punktum'),
+}).strict();
+
+/**
  * Felter der begynder med _ er dokumentation og ignoreres.
  *
  * Skemaerne er strikse, saa et taste-slip fra admin bliver afvist frem for
@@ -91,6 +107,7 @@ const haendelseSkema = z.discriminatedUnion('type', [
   meldingSkema,
   alarmSkema,
   afslutSkema,
+  lydSkema,
 ]);
 
 const scenarieSkema = z.object({

@@ -1,0 +1,52 @@
+{
+  "version": 1,
+  "aktiv": false,
+  "telefon": "",
+  "taarnLyd": "Mulvappe kommunikation.m4a",
+  "taarne": [
+    {
+      "id": "taarn-1",
+      "titel": "TÅRN 1",
+      "vinkelFra": 0,
+      "vinkelTil": 90,
+      "minM": 300,
+      "maksM": 800,
+      "lat": 55.678739,
+      "lon": 9.35457,
+      "kode": "kode-1.png"
+    },
+    {
+      "id": "taarn-2",
+      "titel": "TÅRN 2",
+      "vinkelFra": 90,
+      "vinkelTil": 180,
+      "minM": 300,
+      "maksM": 800,
+      "lat": 55.671117,
+      "lon": 9.35457,
+      "kode": "kode-2.png"
+    },
+    {
+      "id": "taarn-3",
+      "titel": "TÅRN 3",
+      "vinkelFra": 180,
+      "vinkelTil": 270,
+      "minM": 300,
+      "maksM": 800,
+      "lat": 55.671117,
+      "lon": 9.341052,
+      "kode": "kode-3.png"
+    },
+    {
+      "id": "taarn-4",
+      "titel": "TÅRN 4",
+      "vinkelFra": 270,
+      "vinkelTil": 360,
+      "minM": 300,
+      "maksM": 800,
+      "lat": 55.678739,
+      "lon": 9.341052,
+      "kode": "kode-4.png"
+    }
+  ]
+}

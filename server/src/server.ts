@@ -6,7 +6,7 @@
  * afproevet mod en anden opsaetning end den rigtige, er ikke afproevet.
  */
 
-import { existsSync } from 'node:fs';
+import { existsSync, mkdirSync } from 'node:fs';
 import { resolve } from 'node:path';
 import fastifyStatic from '@fastify/static';
 import fastifyWebsocket from '@fastify/websocket';
@@ -40,11 +40,17 @@ export interface Server {
  * @fastify/static svarer paa Range-requests, hvilket er hele forudsaetningen for
  * PMTiles: browseren henter kun de bytes, den skal bruge, ud af den lokale fil.
  */
-const registrerStatiskeFiler = async (app: FastifyInstance, rod: string): Promise<void> => {
+const registrerStatiskeFiler = async (
+  app: FastifyInstance,
+  rod: string,
+  lydmappe: string,
+): Promise<void> => {
   const kortmappe = resolve(rod, 'assets/maps');
   const harKort = existsSync(kortmappe);
+  let harDekoreret = false;
 
   if (harKort) {
+    harDekoreret = true;
     await app.register(fastifyStatic, {
       root: kortmappe,
       prefix: '/kort/',
@@ -56,13 +62,24 @@ const registrerStatiskeFiler = async (app: FastifyInstance, rod: string): Promis
     app.log.warn('assets/maps mangler - koer "npm run hent-kort". Skaermen tegner et noedgitter.');
   }
 
+  // Lydklippene. Mappen oprettes, saa man bare kan lægge en fil i den.
+  mkdirSync(lydmappe, { recursive: true });
+  await app.register(fastifyStatic, {
+    root: lydmappe,
+    prefix: '/lyd/',
+    decorateReply: !harDekoreret,
+    // En udskiftet fil med samme navn skal kunne hoeres med det samme.
+    cacheControl: false,
+    index: false,
+  });
+  harDekoreret = true;
+
   // Skaermen og admin-fladen. I udvikling koerer Vite selv, saa dist findes ikke.
   const flader: readonly { readonly mappe: string; readonly praefiks?: string }[] = [
     { mappe: 'admin/dist', praefiks: '/admin/' },
     { mappe: 'display/dist' },
   ];
 
-  let harDekoreret = harKort;
   for (const { mappe, praefiks } of flader) {
     const sti = resolve(rod, mappe);
     if (!existsSync(sti)) continue;
@@ -101,6 +118,7 @@ export const lavServer = async ({
 
   await app.register(fastifyWebsocket);
 
+  const lydmappe = konfig.lydmappe ?? resolve(rod, 'assets/lyd');
   const udsending = lavUdsending();
   const natvagt = await startNatvagt({
     konfig,
@@ -109,10 +127,13 @@ export const lavServer = async ({
     ...(ur ? { ur } : {}),
   });
 
-  registrerOffentligeRuter(app, { natvagt, udsending });
-  await registrerAdminRuter(app, { natvagt, konfig, udsending });
+  const kodemappe = konfig.kodemappe ?? resolve(rod, 'assets/koder');
+  mkdirSync(kodemappe, { recursive: true });
 
-  if (medStatiskeFiler) await registrerStatiskeFiler(app, rod);
+  registrerOffentligeRuter(app, { natvagt, udsending, kodemappe });
+  await registrerAdminRuter(app, { natvagt, konfig, udsending, lydmappe, kodemappe });
+
+  if (medStatiskeFiler) await registrerStatiskeFiler(app, rod, lydmappe);
 
   return { app, natvagt };
 };

@@ -104,7 +104,7 @@ describe('oversigten', () => {
     const o = (await app.inject({ method: 'GET', url: '/api/admin/oversigt', headers: auth })).json();
     const alarm = o.haendelser.find((h: { id: string }) => h.id === 'alarm-hoved');
 
-    expect(alarm.punkt).toMatchObject({ afstandM: 394, pejlingGrader: 60, sektor: 2 });
+    expect(alarm.punkt).toMatchObject({ afstandM: 1963, pejlingGrader: 147, sektor: 4 });
     expect(alarm.punkt.ddm).toBe("55°39.606'N 009°21.888'E");
   });
 
@@ -144,7 +144,7 @@ describe('fyr, kvitter og stop', () => {
   test('skaermen ser alarmen med det samme', async () => {
     await app.inject({ method: 'POST', url: '/api/admin/fyr/alarm-hoved', headers: auth });
     const skaerm = (await app.inject({ method: 'GET', url: '/api/state' })).json();
-    expect(skaerm.alarm.afstandM).toBe(394);
+    expect(skaerm.alarm.afstandM).toBe(1963);
   });
 
   test('kvitterer', async () => {
@@ -217,12 +217,12 @@ describe('scenarieaendringer', () => {
       method: 'PATCH',
       url: '/api/admin/haendelse/alarm-hoved',
       headers: auth,
-      payload: { lat: 55.6595, lon: 9.3635 },
+      payload: { lat: 55.6745, lon: 9.349 },
     });
 
     const alarm = svar.json().haendelser.find((h: { id: string }) => h.id === 'alarm-hoved');
     expect(alarm.punkt.afstandM).toBeLessThan(800);
-    expect(alarm.punkt.afstandM).not.toBe(394);
+    expect(alarm.punkt.afstandM).not.toBe(1963);
   });
 
   test('opretter en ny haendelse', async () => {
@@ -383,8 +383,8 @@ describe('ravage', () => {
     expect(alarm.gradLat).toBeNull();
     expect(alarm.gradLon).toBeNull();
     // Afstand og pejling bliver staaende - det er kun koordinatet der slaas fra.
-    expect(alarm.afstandM).toBe(394);
-    expect(alarm.pejlingGrader).toBe(60);
+    expect(alarm.afstandM).toBe(1963);
+    expect(alarm.pejlingGrader).toBe(147);
   });
 
   test('kan slaas fra igen', async () => {
@@ -403,6 +403,7 @@ describe('ravage', () => {
       glitch: true,
       maalingsfejl: false,
       lydFra: false,
+      signalfejl: false,
     });
   });
 
@@ -424,6 +425,7 @@ describe('ravage', () => {
       glitch: false,
       maalingsfejl: false,
       lydFra: false,
+      signalfejl: false,
     });
   });
 });

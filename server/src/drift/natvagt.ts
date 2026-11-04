@@ -14,6 +14,24 @@
 import { readFile } from 'node:fs/promises';
 import { dirname, join } from 'node:path';
 import { gemJson, laesJson, sletJson } from '../lager/jsonlager.js';
+import {
+  gemUdvidelse,
+  laesPlan as laesSignalplan,
+  laesUdvidelse,
+  sletUdvidelse,
+} from '../udvidelse/lager.js';
+import {
+  aktiverTaarn,
+  bygVisning,
+  deaktiverTaarn,
+  gemTaarn,
+  respawnTaarn,
+  sletTaarn,
+  visTaarnKode,
+  saetPakke,
+  nulstilLyd,
+} from '../udvidelse/udvidelse.js';
+import type { Udvidelse } from '../udvidelse/udvidelse.js';
 import { gemTilstand, laesTilstand, sletTilstand } from '../lager/tilstandslager.js';
 import { ScenarieFejl, laesScenarie } from '../motor/scenarie.js';
 import { fjernHaendelse, retHaendelse, tilfoejHaendelse } from '../motor/scenarieaendring.js';
@@ -60,6 +78,23 @@ export interface Natvagt {
   aflysHaendelse(id: string): Promise<void>;
   /** Slaar instruktoerernes forstyrrelser til og fra. */
   saetRavagen(aendringer: Ravageaendring): Promise<void>;
+
+  // --- udvidelsespakken: signaltaarne. Samme koe som resten. ---
+  udvidelse(): Udvidelse;
+  saetUdvidelsespakke(aendring: {
+    aktiv?: boolean | undefined;
+    telefon?: string | undefined;
+    taarnLyd?: string | null | undefined;
+    taarnAktiv?: boolean | undefined;
+  }): Promise<void>;
+  gemTaarn(raa: unknown): Promise<void>;
+  sletTaarn(id: string): Promise<void>;
+  respawnTaarn(id: string): Promise<void>;
+  aktiverTaarn(id: string): Promise<void>;
+  deaktiverTaarn(id: string): Promise<void>;
+  visTaarnKode(id: string): Promise<void>;
+  /** Glemmer hvor langt beskeden er kommet: den starter forfra ved naeste forbindelse. */
+  nulstilLyd(): Promise<void>;
 }
 
 export interface Natvagtafhaengigheder {
@@ -200,6 +235,11 @@ export const startNatvagt = async ({
 
   const ur = overstyretUr ?? lavUr(konfig);
 
+  // Udvidelsespakken ligger i sin egen fil og kan foedes fra en forprogrammeret plan.
+  const udvidelsessti = join(dirname(konfig.tilstandssti), 'udvidelse.json');
+  const signalplansti = join(dirname(konfig.scenariesti), 'signaltaarne.json');
+  let udvidelse = await laesUdvidelse(udvidelsessti, signalplansti);
+
   // Genoptag natten, hvis der ligger en gemt tilstand. Ellers begynd forfra.
   let arbejde: Arbejde = {
     tilstand: (await laesTilstand(konfig.tilstandssti)) ?? nyTilstand(scenarie, ur.naa()),
@@ -222,7 +262,13 @@ export const startNatvagt = async ({
   };
 
   const skaermbillede = (): Skaermbillede =>
-    bygSkaermbillede(scenarie, arbejde.tilstand, arbejde, ur.naa());
+    bygSkaermbillede(
+      scenarie,
+      arbejde.tilstand,
+      arbejde,
+      ur.naa(),
+      bygVisning(udvidelse, scenarie, ur.naa()),
+    );
 
   const gem = (): Promise<void> => gemTilstand(konfig.tilstandssti, arbejde.tilstand);
 
@@ -247,6 +293,14 @@ export const startNatvagt = async ({
     udsend(skaermbillede());
   };
 
+  /** Aendrer udvidelsespakken, gemmer den og sender ud. */
+  const aendrUdvidelse = (aendr: (u: Udvidelse, nu: number) => Udvidelse): Promise<void> =>
+    iKoe(async () => {
+      udvidelse = aendr(udvidelse, ur.naa());
+      await gemUdvidelse(udvidelsessti, udvidelse);
+      udsend(skaermbillede());
+    });
+
   const loop = lavLoop(() => iKoe(udfoerSkridt), paaFejl);
 
   return {
@@ -268,11 +322,22 @@ export const startNatvagt = async ({
     nulstilNatten: () =>
       iKoe(async () => {
         await Promise.all([sletTilstand(konfig.tilstandssti), sletJson(arbejdssti)]);
+        await sletUdvidelse(udvidelsessti);
+        udvidelse = await laesSignalplan(signalplansti);
         scenarie = await laesPlan(konfig.scenariesti);
         arbejde = { tilstand: nyTilstand(scenarie, ur.naa()), log: [], historik: tomHistorik() };
         udsend(skaermbillede());
       }),
 
+    udvidelse: () => udvidelse,
+    saetUdvidelsespakke: (aendring) => aendrUdvidelse((u, nu) => saetPakke(u, aendring, nu)),
+    gemTaarn: (raa) => aendrUdvidelse((u, nu) => gemTaarn(u, raa, scenarie, nu)),
+    sletTaarn: (id) => aendrUdvidelse((u, nu) => sletTaarn(u, id, nu)),
+    respawnTaarn: (id) => aendrUdvidelse((u, nu) => respawnTaarn(u, id, scenarie, nu)),
+    aktiverTaarn: (id) => aendrUdvidelse((u, nu) => aktiverTaarn(u, id, nu)),
+    deaktiverTaarn: (id) => aendrUdvidelse((u, nu) => deaktiverTaarn(u, id, nu)),
+    nulstilLyd: () => aendrUdvidelse((u, nu) => nulstilLyd(u, nu)),
+    visTaarnKode: (id) => aendrUdvidelse((u, nu) => visTaarnKode(u, id, nu)),
     opretHaendelse: (ny) => iKoe(() => anvendScenarie(tilfoejHaendelse(scenarie, ny))),
 
     retHaendelsen: (id, aendringer) =>
