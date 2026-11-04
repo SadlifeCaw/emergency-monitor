@@ -316,19 +316,19 @@ Kan køre parallelt med fase 3-7, men kræver fase 0.
 Mål: en kreds uden programmerere skal kunne hente programmet, dobbeltklikke og
 køre aktiviteten. I dag kræver det Node.js, `npm install`, `.env` og kommandolinje.
 
-- [ ] `[K]` **Startdialog med koordinat.** Ved første start spørger programmet om
+- [x] `[K]` **Startdialog med koordinat.** Ved første start spørger programmet om
       centrum (bredde/længde, evt. indsat direkte fra Google Maps), et navn og
       telefonnummeret deltagerne skal dele lokation med. Gemmes, så næste start
       går direkte i gang.
       *Accept: nyt centrum kan angives uden at røre en fil eller en terminal.*
-- [ ] `[K]` **Én executable (`Radar.exe`).** Server, skærm og admin samlet i én fil
+- [x] `[K]` **Én executable (`Radar.exe`).** Server, skærm og admin samlet i én fil
       (fx Node SEA eller `pkg`/Bun-compile), så Node.js ikke skal installeres.
       *Accept: kører på en ren Windows-PC uden Node, npm eller Git.*
-- [ ] `[K]` **Kortet hentes af programmet selv.** Efter koordinaten er angivet,
+- [x] `[K]` **Kortet hentes af programmet selv.** Efter koordinaten er angivet,
       henter programmet kortet (én gang, kræver internet) og viser fremdrift. Ingen
       `npm run hent-kort`, ingen `flyt-base`.
       *Accept: nyt centrum → kort klar uden manuelle trin; virker derefter offline.*
-- [ ] `[K]` **Admin uden tekniske trin.** Admin-token genereres automatisk, og
+- [x] `[K]` **Admin uden tekniske trin.** Admin-token genereres automatisk, og
       programmet viser admin-linket **og en QR-kode**, som telefonen kan scanne.
       *Accept: telefon på samme wifi er logget ind på under et minut.*
 - [ ] `[K]` **Windows Firewall.** Programmet beder om (eller guider til) tilladelsen,
@@ -340,9 +340,9 @@ køre aktiviteten. I dag kræver det Node.js, `npm install`, `.env` og kommandol
 - [ ] `[P]` **Tårne tilpasses i admin.** Antal, vinkelspektrum og afstand sættes ved
       første start, ikke i en JSON-fil.
 - [ ] `[P]` **Telefonnummer i admin.** Kan ændres uden at redigere `scenarios/`.
-- [ ] `[P]` **Dobbeltklik-start.** Åbner skærmen i fuldskærm, holder PC'en vågen og
+- [x] `[P]` **Dobbeltklik-start.** Åbner skærmen i fuldskærm, holder PC'en vågen og
       genstarter ved nedbrud, som `start.bat` gør i dag.
-- [ ] `[P]` **Lyd armeres automatisk** ved start (kiosk-flag), så deltagerne ikke
+- [x] `[P]` **Lyd armeres automatisk** ved start (kiosk-flag), så deltagerne ikke
       skal huske at trykke på skærmen.
 - [ ] `[K]` **Udgivelse på GitHub.** `Radar-<version>.zip` som release, med README,
       vejledning (print for-/bagside) og eksempelindhold.

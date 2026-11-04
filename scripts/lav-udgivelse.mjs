@@ -80,10 +80,23 @@ koer(process.execPath, [
   'NODE_SEA_FUSE_fce680ab2cc467b6e072b8b5df1996b2',
 ]);
 
+// Ingen konsol: programmet skal aabne et vindue (siden i browseren), ikke en sort kommandoprompt.
+// Det goeres ved at saette PE-headerens "subsystem" til Windows GUI (2).
+{
+  const bytes = await readFile(exe);
+  const pe = bytes.readUInt32LE(0x3c);
+  if (bytes.toString('ascii', pe, pe + 2) !== 'PE') throw new Error('Radar.exe er ikke en PE-fil.');
+  bytes.writeUInt16LE(2, pe + 24 + 68);
+  await writeFile(exe, bytes);
+}
+
 // ---------------------------------------------------------------- 4. mappen
 log('4/5  Samler mappen ...');
 await cp(join(ROD, 'display/dist'), join(MAPPE, 'display/dist'), { recursive: true });
 await cp(join(ROD, 'admin/dist'), join(MAPPE, 'admin/dist'), { recursive: true });
+
+// Opsaetningssiden (foerste start, QR-kode og knapper). Ren HTML, ingen build.
+await cp(join(ROD, 'setup'), join(MAPPE, 'setup'), { recursive: true });
 
 // Scenariet uden den alarm, der hoerer til udviklerens sted. Centrum saettes ved foerste start.
 const scenarie = JSON.parse(await readFile(join(ROD, 'scenarios/nat.json'), 'utf8'));
@@ -134,15 +147,17 @@ await writeFile(
 2. Dobbeltklik på Radar.exe.
    Windows kan sige "Windows har beskyttet din pc". Klik "Flere oplysninger"
    og derefter "Kør alligevel". Programmet er ikke signeret.
-3. Første gang spørger Radar om et centrum. Højreklik på stedet i Google Maps,
-   klik på tallene øverst i menuen, og indsæt dem. Kortet hentes (kræver
-   internet, kun den ene gang).
-4. Scan QR-koden med instruktørens telefon (samme wifi) for at komme ind i admin.
+3. Der åbner en side i din browser. Klik på kortet, hvor radaren skal have sit
+   centrum (eller indsæt et koordinat fra Google Maps), og tryk "Opret radar".
+   Kortet hentes (kræver internet, kun den ene gang).
+4. Scan QR-koden på siden med instruktørens telefon (samme wifi) for at komme
+   ind i admin. Tryk "Åbn radarskærmen i fuldskærm" for selve skærmen.
 5. Tryk "Tillad", hvis Windows spørger om netværksadgang.
 6. Tryk på skærmen én gang for at slå lyden til.
 
-Nyt centrum: start Radar.exe og skriv N, når den spørger.
-Stop: luk vinduet.
+Nyt centrum: åbn Radar.exe igen og tryk "Nyt centrum" på siden.
+Stop: tryk "Stop radaren" på siden.
+Går noget galt, står det i filen radar-fejl.log ved siden af programmet.
 
 Kildekode og hjælp: https://github.com/SadlifeCaw/emergency-monitor
 `,

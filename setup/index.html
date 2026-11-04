@@ -1,0 +1,111 @@
+<!doctype html>
+<html lang="da">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Radar</title>
+    <link rel="stylesheet" href="leaflet/leaflet.css" />
+    <link rel="stylesheet" href="start.css" />
+  </head>
+  <body>
+    <main>
+      <header class="hoved">
+        <h1>R A D A R</h1>
+        <p>overvågning · natvagt</p>
+      </header>
+
+      <!-- ------------------------------------------------ 1. vælg centrum -->
+      <section id="opsaetning" hidden>
+        <h2>1 · Hvor skal radaren have sit centrum?</h2>
+        <p class="hjaelp">
+          Klik på kortet, eller indsæt et koordinat fra Google Maps: højreklik på stedet og klik på
+          tallene øverst i menuen.
+        </p>
+
+        <div id="kort" aria-label="Kort til at vælge centrum"></div>
+        <p id="kortnote" class="note" hidden>
+          Kortet her kræver internet. Uden internet kan du stadig indsætte koordinatet nedenfor.
+        </p>
+
+        <label class="felt">
+          <span>Koordinat (bredde, længde)</span>
+          <input id="koordinat" type="text" inputmode="decimal" autocomplete="off"
+                 placeholder="fx 55.674928, 9.347811" />
+        </label>
+        <p id="koordinattjek" class="note" aria-live="polite"></p>
+
+        <label class="felt">
+          <span>Navn på stedet (valgfrit)</span>
+          <input id="navn" type="text" maxlength="30" autocomplete="off" placeholder="CENTRUM" />
+        </label>
+
+        <p id="fejl" class="fejl" hidden></p>
+
+        <div class="knapper">
+          <button id="opret" class="stor" type="button" disabled>Opret radar</button>
+          <button id="fortsaet" type="button" hidden>Fortsæt uden kort</button>
+        </div>
+        <p class="note">Kortet hentes første gang og kræver internet. Det tager et par minutter.</p>
+      </section>
+
+      <!-- ------------------------------------------------ 2. arbejder -->
+      <section id="arbejder" hidden>
+        <h2>2 · Gør radaren klar</h2>
+        <div class="bar" role="progressbar" aria-valuemin="0" aria-valuemax="100">
+          <div id="bjaelke"></div>
+        </div>
+        <p class="procent"><span id="procent">0</span> %</p>
+        <p id="besked" class="hjaelp"></p>
+      </section>
+
+      <!-- ------------------------------------------------ 3. klar -->
+      <section id="klar" hidden>
+        <h2 class="groen">Radaren kører</h2>
+
+        <div class="to">
+          <div class="qr">
+            <div id="qr" aria-label="QR-kode til admin"></div>
+            <p id="uden-net" class="note" hidden>
+              Ingen netværk fundet. Telefonen og PC'en skal være på det samme wifi.
+              Det behøver ikke have internet; et hotspot fra telefonen er nok.
+            </p>
+          </div>
+
+          <div>
+            <h3>Admin (instruktørens telefon)</h3>
+            <p class="hjaelp">
+              Scan QR-koden med telefonens kamera. Telefonen skal være på samme wifi som PC'en.
+            </p>
+            <p class="link"><a id="link" href="#"></a></p>
+            <button id="kopier" type="button" class="lille">Kopiér linket</button>
+
+            <h3>Skærmen</h3>
+            <button id="skaerm" type="button" class="stor">Åbn radarskærmen i fuldskærm</button>
+            <p class="hjaelp">Tryk på skærmen én gang for at slå lyden til.</p>
+          </div>
+        </div>
+
+        <ul class="tjek">
+          <li>Tryk <strong>Tillad</strong>, hvis Windows spørger om netværksadgang.</li>
+          <li>Du kan lukke denne side. Radaren kører videre. Åbn <strong>Radar.exe</strong> igen for at komme hertil.</li>
+        </ul>
+
+        <p id="manglerkort" class="fejl" hidden>
+          Kortet mangler, så skærmen viser et gitter. Tryk <strong>Nyt centrum</strong> og vælg
+          stedet igen, mens PC'en har internet.
+        </p>
+
+        <div class="knapper">
+          <button id="nyt" type="button" class="lille">Nyt centrum</button>
+          <button id="stop" type="button" class="lille fare">Stop radaren</button>
+        </div>
+        <p id="stoppet" class="note" hidden>Radaren er stoppet. Du kan lukke siden.</p>
+      </section>
+
+      <p id="forbinder" class="note" hidden>Forbinder ...</p>
+    </main>
+
+    <script src="leaflet/leaflet.js"></script>
+    <script src="start.js"></script>
+  </body>
+</html>

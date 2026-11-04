@@ -27,6 +27,10 @@ export interface Serveropsaetning {
   readonly ur?: Ur;
   /** Slaas fra i test, hvor forespoergsler sendes direkte ind i appen. */
   readonly medStatiskeFiler?: boolean;
+  /** Ingen logning. Bruges af Radar.exe, der ikke har noget konsolvindue. */
+  readonly stille?: boolean;
+  /** Ekstra ruter, fx opsaetningssiden i Radar.exe. Kaldes efter de statiske filer. */
+  readonly ekstraRuter?: (app: FastifyInstance) => Promise<void>;
 }
 
 export interface Server {
@@ -109,8 +113,12 @@ export const lavServer = async ({
   rod,
   ur,
   medStatiskeFiler = true,
+  stille = false,
+  ekstraRuter,
 }: Serveropsaetning): Promise<Server> => {
-  const app = Fastify({ logger: { level: konfig.miljoe === 'drift' ? 'warn' : 'info' } });
+  const app = Fastify({
+    logger: stille ? false : { level: konfig.miljoe === 'drift' ? 'warn' : 'info' },
+  });
 
   if (konfig.tokenErGenereret) {
     app.log.info(`Flygtigt admin-token til denne session: ${konfig.adminToken}`);
@@ -134,6 +142,7 @@ export const lavServer = async ({
   await registrerAdminRuter(app, { natvagt, konfig, udsending, lydmappe, kodemappe });
 
   if (medStatiskeFiler) await registrerStatiskeFiler(app, rod, lydmappe);
+  if (ekstraRuter) await ekstraRuter(app);
 
   return { app, natvagt };
 };

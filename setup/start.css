@@ -1,0 +1,271 @@
+/*
+ * Opsætningssiden til Radar.exe.
+ * Samme udtryk som radaren selv: fosfor på næsten sort. Store knapper og tydelig tekst,
+ * fordi den bruges af folk, der aldrig har set programmet før.
+ */
+
+:root {
+  --flade: #0c100c;
+  --flade-2: #121812;
+  --fosfor: #33ff6a;
+  --fosfor-d: rgb(51 255 106 / 80%);
+  --fosfor-s: rgb(51 255 106 / 26%);
+  --rav: #ffb000;
+  --signal: #ff4d4d;
+  --papir: #d8d2c2;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html {
+  background: var(--flade);
+}
+
+body {
+  margin: 0;
+  color: var(--fosfor-d);
+  font: 17px/1.55 ui-monospace, 'Cascadia Mono', Consolas, 'DejaVu Sans Mono', monospace;
+  background: radial-gradient(ellipse at 50% -10%, rgb(51 255 106 / 9%), transparent 60%), var(--flade);
+  min-height: 100vh;
+}
+
+main {
+  max-width: 52rem;
+  margin: 0 auto;
+  padding: 1.5rem 1rem 4rem;
+}
+
+.hoved {
+  text-align: center;
+  border-bottom: 1px solid var(--fosfor-s);
+  padding-bottom: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+h1 {
+  margin: 0;
+  font-size: 2.2rem;
+  letter-spacing: 0.4em;
+  color: var(--fosfor);
+  text-shadow: 0 0 16px rgb(51 255 106 / 45%);
+}
+
+.hoved p {
+  margin: 0.2rem 0 0;
+  letter-spacing: 0.3em;
+  font-size: 0.8rem;
+  color: var(--rav);
+  text-transform: uppercase;
+}
+
+h2 {
+  margin: 0 0 0.6rem;
+  font-size: 1.15rem;
+  color: var(--fosfor);
+  letter-spacing: 0.06em;
+}
+
+h2.groen {
+  font-size: 1.5rem;
+  text-shadow: 0 0 10px rgb(51 255 106 / 45%);
+}
+
+h3 {
+  margin: 1.4rem 0 0.3rem;
+  font-size: 0.8rem;
+  letter-spacing: 0.25em;
+  text-transform: uppercase;
+  color: var(--rav);
+  font-weight: 400;
+}
+
+h3:first-child {
+  margin-top: 0;
+}
+
+.hjaelp {
+  margin: 0.3rem 0 0.8rem;
+}
+
+.note {
+  margin: 0.4rem 0;
+  font-size: 0.85rem;
+  color: var(--papir);
+  opacity: 0.8;
+}
+
+.fejl {
+  border: 1px solid var(--signal);
+  border-left-width: 6px;
+  color: #ffd0d0;
+  background: rgb(255 77 77 / 8%);
+  padding: 0.7rem 1rem;
+  margin: 1rem 0;
+}
+
+[hidden] {
+  display: none !important;
+}
+
+/* ---- formular ---- */
+
+#kort {
+  height: 20rem;
+  border: 1px solid var(--fosfor-s);
+  margin: 0.4rem 0;
+  background: var(--flade-2);
+  cursor: crosshair;
+}
+
+.felt {
+  display: block;
+  margin: 1rem 0 0.2rem;
+}
+
+.felt span {
+  display: block;
+  margin-bottom: 0.3rem;
+  font-size: 0.8rem;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: var(--fosfor-d);
+}
+
+input {
+  width: 100%;
+  padding: 0.8rem 0.9rem;
+  font: inherit;
+  color: var(--papir);
+  background: #070a07;
+  border: 1px solid var(--fosfor-s);
+  border-radius: 0;
+}
+
+input:focus {
+  outline: 2px solid var(--fosfor);
+  outline-offset: 1px;
+}
+
+/* ---- knapper ---- */
+
+button {
+  font: inherit;
+  letter-spacing: 0.1em;
+  color: var(--fosfor);
+  background: transparent;
+  border: 1px solid var(--fosfor);
+  padding: 0.6rem 1rem;
+  cursor: pointer;
+  border-radius: 0;
+}
+
+button:hover:not(:disabled) {
+  background: rgb(51 255 106 / 14%);
+}
+
+button:disabled {
+  opacity: 0.35;
+  cursor: not-allowed;
+}
+
+button.stor {
+  padding: 1rem 1.6rem;
+  font-size: 1.1rem;
+  background: rgb(51 255 106 / 14%);
+  box-shadow: 0 0 18px rgb(51 255 106 / 25%);
+}
+
+button.lille {
+  font-size: 0.85rem;
+  padding: 0.45rem 0.8rem;
+}
+
+button.fare {
+  color: var(--signal);
+  border-color: var(--signal);
+}
+
+button.fare:hover:not(:disabled) {
+  background: rgb(255 77 77 / 14%);
+}
+
+.knapper {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.8rem;
+  margin: 1.2rem 0 0.4rem;
+}
+
+/* ---- fremdrift ---- */
+
+.bar {
+  height: 1.6rem;
+  border: 1px solid var(--fosfor-s);
+  background: #070a07;
+  margin: 1.2rem 0 0.4rem;
+}
+
+#bjaelke {
+  height: 100%;
+  width: 0;
+  background: repeating-linear-gradient(90deg, var(--fosfor) 0 10px, transparent 10px 13px);
+  transition: width 0.4s ease;
+}
+
+.procent {
+  font-size: 2rem;
+  margin: 0;
+  color: var(--fosfor);
+  text-align: right;
+}
+
+/* ---- klar ---- */
+
+.to {
+  display: grid;
+  grid-template-columns: 15rem 1fr;
+  gap: 1.8rem;
+  margin: 1.2rem 0;
+}
+
+@media (max-width: 40rem) {
+  .to {
+    grid-template-columns: 1fr;
+  }
+}
+
+.qr #qr {
+  background: #fff;
+  padding: 0.6rem;
+  line-height: 0;
+}
+
+.qr svg {
+  width: 100%;
+  height: auto;
+}
+
+.link {
+  word-break: break-all;
+  margin: 0.3rem 0;
+  font-size: 0.85rem;
+}
+
+.link a {
+  color: var(--papir);
+}
+
+.tjek {
+  margin: 1.2rem 0;
+  padding-left: 1.2rem;
+}
+
+.tjek li {
+  margin: 0.4rem 0;
+}
+
+strong {
+  color: var(--fosfor);
+}

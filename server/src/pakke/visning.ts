@@ -1,6 +1,6 @@
 /**
- * Det man ser og goer ved opstart af Radar.exe: admin-link med QR-kode, skaermen
- * i fuldskaerm og en PC, der ikke gaar i dvale.
+ * Det Radar.exe goer for brugeren ved opstart: admin-link med QR-kode, skaermen
+ * i fuldskaerm og en PC, der ikke gaar i dvale. Intet af det skriver til en konsol.
  */
 
 import { type ChildProcess, spawn } from 'node:child_process';
@@ -33,35 +33,39 @@ export const bedsteAdresse = (liste: readonly Netadresse[]): Netadresse | undefi
 export const adminLink = (adresse: string, port: number, token: string): string =>
   `http://${adresse}:${port}/admin/?token=${token}`;
 
-/** Skriver admin-linket og en QR-kode, og gemmer linket i en fil. */
-export const visAdminLink = async (rod: string, port: number, token: string): Promise<void> => {
+export interface Admininfo {
+  /** Et link pr. netvaerkskort. Det foerste er det, QR-koden peger paa. */
+  readonly links: readonly string[];
+  /** QR-koden som SVG, klar til at staa paa en side. Null uden netvaerk. */
+  readonly qrSvg: string | null;
+}
+
+/** Admin-linkene og en QR-kode til det bedste af dem. Gemmer ogsaa linket i en fil. */
+export const adminInfo = async (rod: string, port: number, token: string): Promise<Admininfo> => {
   const adresser = lokaleAdresser();
+  if (adresser.length === 0) return { links: [], qrSvg: null };
 
-  if (adresser.length === 0) {
-    process.stdout.write(`
-  Ingen netværksforbindelse fundet.
-  Telefonen og PC'en skal være på det samme net. Det behøver ikke internet:
-  et hotspot fra telefonen er nok. Skærmen selv bruger ikke netværket.
-`);
-    return;
-  }
-
-  const links = adresser.map((a) => adminLink(a.adresse, port, token));
+  const bedste = bedsteAdresse(adresser) ?? adresser[0];
+  const links = [
+    ...(bedste ? [adminLink(bedste.adresse, port, token)] : []),
+    ...adresser
+      .filter((a) => a.adresse !== bedste?.adresse)
+      .map((a) => adminLink(a.adresse, port, token)),
+  ];
   await writeFile(join(rod, 'admin-link.txt'), `${links.join('\n')}\n`, 'utf8');
 
-  const bedste = bedsteAdresse(adresser);
-  process.stdout.write('\n  ADMIN — scan QR-koden med instruktørens telefon (samme wifi):\n\n');
-  if (bedste) {
-    const qr = await QRCode.toString(adminLink(bedste.adresse, port, token), {
-      type: 'terminal',
-      small: true,
-    });
-    process.stdout.write(`${qr}\n`);
-  }
-  for (const [i, a] of adresser.entries()) {
-    process.stdout.write(`  ${a.kort}\n    ${links[i]}\n`);
-  }
-  process.stdout.write('\n  Linket er også gemt i admin-link.txt.\n');
+  const foerste = links[0];
+  const qrSvg = foerste ? await QRCode.toString(foerste, { type: 'svg', margin: 1 }) : null;
+  return { links, qrSvg };
+};
+
+/** Aabner en adresse i brugerens egen browser - uden at et konsolvindue blinker forbi. */
+export const aabnIBrowser = (url: string): void => {
+  spawn('cmd.exe', ['/c', 'start', '', url], {
+    detached: true,
+    stdio: 'ignore',
+    windowsHide: true,
+  }).unref();
 };
 
 // ---------------------------------------------------------------- skaerm

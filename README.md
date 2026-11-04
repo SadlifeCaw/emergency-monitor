@@ -5,15 +5,16 @@ Kildekode og udgivelser: <https://github.com/SadlifeCaw/emergency-monitor>
 ## Hent og kør (Windows)
 
 1. Hent **`Radar-<version>-windows.zip`** fra [Releases](https://github.com/SadlifeCaw/emergency-monitor/releases/latest).
-2. Pak zip-filen ud, og dobbeltklik på **`Radar.exe`**. Ingen installation.
+2. Pak zip-filen ud, og dobbeltklik på **`Radar.exe`**. Ingen installation, og intet sort kommandovindue.
    (Windows siger måske "Windows har beskyttet din pc": klik *Flere oplysninger* → *Kør alligevel*.)
-3. Første gang spørger programmet om **centrum**: højreklik på stedet i Google Maps,
-   klik på tallene øverst i menuen, og indsæt dem. Kortet hentes (kræver internet, kun den ene gang).
-4. Scan **QR-koden** med instruktørens telefon (samme wifi) for at komme ind i admin.
+3. En side åbner i din browser. **Klik på kortet** (eller indsæt et koordinat fra Google Maps), og tryk *Opret radar*.
+   Kortet hentes med en statuslinje (kræver internet, kun den ene gang).
+4. Scan **QR-koden** på siden med instruktørens telefon (samme wifi) for at komme ind i admin, og tryk
+   *Åbn radarskærmen i fuldskærm*.
 5. Tryk *Tillad*, hvis Windows spørger om netværksadgang, og tryk på skærmen én gang for at slå lyden til.
 
-Nyt centrum: start `Radar.exe` og skriv `N`, når den spørger. Programmet bygges med `npm run udgivelse`.
-
+Åbn `Radar.exe` igen for at komme tilbage til siden: her er *Nyt centrum* og *Stop radaren*.
+Går noget galt, står det i `radar-fejl.log`. Programmet bygges med `npm run udgivelse`.
 
 > **Extended** = den oprindelige Emergency Monitor + udvidelsespakken med signaltårne.
 > Alarmsystemet ser ens ud, indtil pakken aktiveres i admin.

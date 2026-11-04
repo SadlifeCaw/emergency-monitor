@@ -47,9 +47,29 @@ export const bbox = (valg: Kortmaerke, margin: number = MARGIN_M): string => {
     .join(',');
 };
 
-const koer = (kommando: string, argumenter: readonly string[]): Promise<void> =>
+/** Procenttallet i go-pmtiles' statuslinje ("fetching chunks  46% |███|"), eller null. */
+export const procentFra = (tekst: string): number | null => {
+  const alle = [...tekst.matchAll(/(\d{1,3})%/g)];
+  const sidste = alle.at(-1)?.[1];
+  if (sidste === undefined) return null;
+  const tal = Number(sidste);
+  return tal >= 0 && tal <= 100 ? tal : null;
+};
+
+const koer = (
+  kommando: string,
+  argumenter: readonly string[],
+  paaProcent?: (procent: number) => void,
+): Promise<void> =>
   new Promise((klar, fejl) => {
-    const p = spawn(kommando, [...argumenter], { stdio: 'inherit' });
+    // Ingen konsol: udskriften fanges, og procenttallet sendes videre til opsaetningssiden.
+    const p = spawn(kommando, [...argumenter], { stdio: ['ignore', 'pipe', 'pipe'], windowsHide: true });
+    const laes = (bidder: Buffer): void => {
+      const procent = procentFra(bidder.toString('utf8'));
+      if (procent !== null) paaProcent?.(procent);
+    };
+    p.stdout.on('data', laes);
+    p.stderr.on('data', laes);
     p.on('error', fejl);
     p.on('close', (kode) =>
       kode === 0 ? klar() : fejl(new Error(`${kommando} stoppede med kode ${kode}`)),
@@ -95,7 +115,11 @@ const findSenesteBuild = async (): Promise<string> => {
 };
 
 /** Henter kortet. Returnerer true, hvis det lykkedes. */
-export const hentKort = async (rod: string, valg: Kortmaerke): Promise<boolean> => {
+export const hentKort = async (
+  rod: string,
+  valg: Kortmaerke,
+  paaFremdrift?: (procent: number) => void,
+): Promise<boolean> => {
   try {
     const vaerktoej = await sikrVaerktoej(rod);
     const url = await findSenesteBuild();
@@ -107,18 +131,13 @@ export const hentKort = async (rod: string, valg: Kortmaerke): Promise<boolean> 
       kortFil(rod),
       `--bbox=${bbox(valg)}`,
       `--maxzoom=${MAKS_ZOOM}`,
-    ]);
+    ], paaFremdrift);
 
-    const { size } = await stat(kortFil(rod));
+    await stat(kortFil(rod));
     await writeFile(maerkeFil(rod), JSON.stringify({ lat: valg.lat, lon: valg.lon }), 'utf8');
-    process.stdout.write(`\n  Kortet er hentet (${(size / 1e6).toFixed(1)} MB) og virker nu uden internet.\n`);
     return true;
-  } catch (fejl) {
-    process.stdout.write(
-      `\n  Kortet kunne ikke hentes (${(fejl as Error).message}).\n` +
-        '  Radaren kører videre med et nødgitter. Start programmet igen med internet,\n' +
-        '  hvis du vil have det rigtige kort.\n',
-    );
+  } catch {
+    // Radaren koerer videre med et noedgitter. Siden fortaeller det til brugeren.
     return false;
   }
 };
