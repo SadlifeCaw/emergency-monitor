@@ -88,6 +88,8 @@ await cp(join(ROD, 'admin/dist'), join(MAPPE, 'admin/dist'), { recursive: true }
 // Scenariet uden den alarm, der hoerer til udviklerens sted. Centrum saettes ved foerste start.
 const scenarie = JSON.parse(await readFile(join(ROD, 'scenarios/nat.json'), 'utf8'));
 scenarie.haendelser = [];
+// Neutralt udgangspunkt. Centrum og navn saettes af Radar.exe ved foerste start.
+scenarie.base = { lat: 56, lon: 10, label: 'CENTRUM', verificeret: false };
 scenarie.nat = { ...scenarie.nat, fra: '17:00', til: '05:00' };
 scenarie._note =
   'Indstillinger. Centrum saettes af Radar.exe ved foerste start. Alarmer oprettes fra telefonen.';

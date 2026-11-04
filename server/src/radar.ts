@@ -114,13 +114,15 @@ const spoergOmCentrum = async (ind: Indtastning): Promise<Radarvalg | null> => {
   return null;
 };
 
-/** Staar scenariets base paa det sted, der er valgt? */
+/** Staar scenariets base paa det sted - og med det navn - der er valgt? */
 const scenarieHarCentrum = async (valg: Radarvalg): Promise<boolean> => {
   try {
     const s = JSON.parse(await readFile(join(ROD, 'scenarios', 'nat.json'), 'utf8')) as {
-      base?: { lat?: number; lon?: number };
+      base?: { lat?: number; lon?: number; label?: string };
     };
-    return s.base?.lat === valg.lat && s.base?.lon === valg.lon;
+    return (
+      s.base?.lat === valg.lat && s.base?.lon === valg.lon && s.base?.label === valg.navn
+    );
   } catch {
     return false;
   }
